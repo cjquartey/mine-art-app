@@ -5,13 +5,14 @@ const express = require('express');
 const app = express();
 const connectDB = require('./config/database');
 const projectRoutes = require('./routes/projectRoutes');
-
+const authRoutes = require('./routes/authRoutes');
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 // Routes
 app.use('/api/projects', projectRoutes);
+app.use('/api/auth', authRoutes);
 
 app.get('/api/health', (req, res) => {
     res.json({
