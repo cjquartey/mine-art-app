@@ -4,7 +4,7 @@ import api from '../utils/api';
 // Centralised authentication
 const AuthContext = createContext(null);
 
-export function AuthProvider({children}) {
+function AuthProvider({children}) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -65,11 +65,14 @@ export function AuthProvider({children}) {
     );
 };
 
-// Custom hook
-export function useAuth() {
+// Custom hook to provide access to the global auth state
+function useAuth() {
     const context = useContext(AuthContext);
     if (!context) {
+        // Authentication data is protected from components outside the AuthProvider
         throw new Error('useAuth must be used within AuthProvider');
     };
     return context;
 };
+
+export {AuthProvider, useAuth};
