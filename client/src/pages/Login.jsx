@@ -51,26 +51,51 @@ export function LoginPage() {
     }
 
     return(
-        <>
-            <h1>Login Page</h1>
-            <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-                <input {...register("email")} type="text" placeholder="Email address" />
-                {errors.email && (<ErrorMessage message={errors.email.message} />)}
+        <div className="hero bg-base-200 h-[calc(100vh-64px)]">
+            <div className="hero-content flex-col lg:flex-row-reverse">
+                <div className="text-center lg:text-left">
+                    <h1 className="text-5xl font-bold mb-10">Welcome back!</h1>
+                    <ul className="list bg-base-100 rounded-box shadow-md">
+                        <li className="list-row text-xl">
+                            Collaborate with other designers
+                        </li>
+                        <li className="list-row text-xl">
+                            Save your projects
+                        </li>
+                    </ul>
+                </div>
+                
+                <div className="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
+                    <div className="card-body">
+                        <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+                            <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
+                                <legend className="fieldset-legend">Login</legend>
 
-                <input {...register("password")} type={visiblePassword ? "text" : "password"} placeholder="Password" />
-                <button type="button" onClick={togglePasswordVisibility}>
-                    {visiblePassword ? "Hide" : "Show"}
-                </button>
-                {errors.password && (<ErrorMessage message={errors.password.message} />)}
+                                <label className="label">Email</label>
+                                <input {...register("email")} type="email" className="input" placeholder="Email address" />
+                                {errors.email && (<ErrorMessage message={errors.email.message} />)}
 
-                <button disabled={isSubmitting} type="submit">
-                    {isSubmitting ? "Logging in..." : "Login"}
-                </button>
+                                <label className="label">Password</label>
+                                <input {...register("password")} type={visiblePassword ? "text" : "password"} className="input" placeholder="Password" />
+                                <button type="button" className="btn btn-warning" onClick={togglePasswordVisibility}>
+                                    {visiblePassword ? "Hide" : "Show"}
+                                </button>
+                                {errors.password && (<ErrorMessage message={errors.password.message} />)}
 
-                {errors.root && (<ErrorMessage message={errors.root.message} />)}
-            </form>
+                                <button className="btn btn-lg btn-neutral mt-4" disabled={isSubmitting} type="submit">
+                                    {isSubmitting ? "Logging in..." : "Login"}
+                                </button>
 
-            <Link to="/register">Register</Link>
-        </>
+                                {errors.root && (<ErrorMessage message={errors.root.message} />)}
+                            </fieldset>
+                        </form>
+
+                        <div>Don't have an account? 
+                            <Link className="font-bold" to="/register"> Sign up here</Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 };

@@ -1,9 +1,8 @@
 import { Routes, Route } from 'react-router-dom';
-import './App.css';
-import { HomePage } from './pages/Home';
+import { HomePage } from './pages/home/HomePage';
 import { LoginPage } from './pages/Login';
 import { RegisterPage } from './pages/Register';
-import { DashboardPage } from './pages/Dashboard';
+import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Navbar } from './components/Navbar';
 
@@ -20,7 +19,7 @@ function App() {
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
       </Routes>
     </>
-  )
-}
+  );
+};
 
 export default App
