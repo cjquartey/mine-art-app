@@ -1,6 +1,30 @@
 const Project = require('../models/Project');
+const User = require('../models/User');
 const getSession = require('./sessionManager');
 const multer = require('multer');
+
+async function validateCollaborators(userIds) {
+    if (!userIds || userIds.length === 0) return{
+        valid: true,
+        userIds: []
+    }
+    
+    const users = await User.find({_id : {$in: userIds}});
+
+    if (users.length !== userIds.length) {
+        const foundIds = users.map(u => u._id.toString());
+        const notFound = userIds.filter(id => !foundIds.includes(id.toString()));
+        return {
+            valid: false,
+            notFound
+        }
+    }
+
+    return {
+        valid: true,
+        userIds: users.map(user => user._id)
+    }
+}
 
 function handleUpload(uploadMiddleware) {
     return (req, res, next) => {
@@ -79,5 +103,6 @@ async function validateDrawingAccess(req, res, drawing) {
 module.exports = {
     handleUpload,
     validateProjectAccess,
-    validateDrawingAccess
+    validateDrawingAccess,
+    validateCollaborators
 };
