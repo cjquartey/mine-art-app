@@ -23,28 +23,25 @@ function handleUpload(uploadMiddleware) {
 }
 
 function validateProjectAccess(userId, project) {
-    /*
-    Check if userId matches project.ownerId OR is in project.collaborators
-    Return boolean
-    */
     // Check if user is the owner of the project
-    if (userId.toString() === project.ownerId.toString()) return {authorised: true};
+    if (userId.toString() === project.ownerId.toString()) return {
+        authorised: true,
+        role: 'Owner'
+    };
 
     // Check if user is a collaborator of the project
-    if (project.collaborators.includes(userId.toString())) return {authorised: true};
+    if (project.collaborators.includes(userId.toString())) return {
+        authorised: true,
+        role: 'Collaborator'
+    };
 
     return {
         authorised: false,
         reason: "User is neither the owner nor a collaborator on the project"
-    }
+    };
 };
 
 async function validateDrawingAccess(req, res, drawing) {
-    /*
-    If req.user exists: check if user is creator OR has project access
-    If guest: check if req.sessionId matches drawing.sessionId
-    Return { authorized: boolean, reason?: string }
-    */
     try {
         if (req.user?.userId) {
             const {userId} = req.user;
