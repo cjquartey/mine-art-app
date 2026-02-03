@@ -5,6 +5,9 @@ import { RegisterPage } from './pages/Register';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Navbar } from './components/Navbar';
+import { ProjectView } from './components/Projects/ProjectView';
+import { ImageUploader } from './components/Upload/ImageUploader';
+import { ProjectList } from './components/Projects/ProjectList';
 
 function App() {
   return (
@@ -17,6 +20,9 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+        <Route path="/projects" element={<ProtectedRoute><ProjectList /></ProtectedRoute>} />
+        <Route path="/projects/:id" element={<ProtectedRoute><ProjectView /></ProtectedRoute>} />
+        <Route path="/upload" element={<ImageUploader />} />
       </Routes>
     </>
   );

@@ -1,4 +1,4 @@
-import { SectionHeader } from "./SectionHeader";
+import { SectionHeader } from "../../components/SectionHeader";
 import { EditIcon, TeamIcon, QualityIcon } from "../../icons/";
 
 export function ValueProposition() {
@@ -15,7 +15,7 @@ export function ValueProposition() {
 
                 <SellingPoint 
                     title={"Live Collaboration"} 
-                    body={"Mine Art allows you to share and edit the same project with other designers for real-time colloboration!"} 
+                    body={"Mine Art allows you to share and edit the same project with other designers for real-time collaboration!"} 
                     position={2}
                     icon={<TeamIcon />}
                 />

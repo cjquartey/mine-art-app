@@ -7,3 +7,5 @@ export {SettingsIcon} from './SettingsIcon';
 export {SunIcon} from './SunIcon';
 export {TeamIcon} from './TeamIcon';
 export {CanvasIcon} from './CanvasIcon';
+export {CreateNewProjectIcon} from './CreateNewProjectIcon';
+export {CancelIcon} from './CancelIcon';

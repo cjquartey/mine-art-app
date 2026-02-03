@@ -9,7 +9,7 @@ export function Navbar() {
     return(
         <div className="navbar bg-base-100 shadow-sm sticky top-0 z-50">
             <div className="flex-1">
-                <NavLink to={user ? "/dashboard" : "/"} className="btn btn-ghost text-xl">Mine Art</NavLink>
+                <NavLink to={user ? "/dashboard" : "/"} state={user ? {activeTab: 'home'} : undefined} className="btn btn-ghost text-xl">Mine Art</NavLink>
                 {/*Add Logo*/}
             </div>
 

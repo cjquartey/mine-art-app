@@ -1,6 +1,7 @@
 const {validateProjectAccess, validateCollaborators} = require('../utils/validators');
 const Project = require('../models/Project');
 const Drawing = require('../models/Drawing');
+const {deleteFile} = require('../config/gridfs');
 
 async function createProject(req, res) {
     try{
@@ -51,7 +52,9 @@ async function getProjects(req, res) {
         if(projectCount === 0) {
             return res.status(200).json({
                 success: true,
-                message: 'No projects'
+                message: 'No projects',
+                userOwnedProjects,
+                userCollabProjects
             });
         }
 
@@ -77,7 +80,7 @@ async function getProjectDetails(req, res) {
         const {projectId} = req.params;
 
         // Find the project if it exists, reject the request if it doesn't
-        const project = await Project.findById(projectId);
+        const project = await Project.findById(projectId).populate('collaborators', 'firstName lastName username');
         
         if (!project) {
             return res.status(400).json({
@@ -167,10 +170,15 @@ async function updateProject(req, res) {
         }
         await project.save();
 
+        // Populate collaborators and fetch drawings to match getProjectDetails response
+        await project.populate('collaborators', 'firstName lastName username');
+        const projectDrawings = await Drawing.find({projectId: project._id});
+
         return res.status(200).json({
             success: true,
             message: `${project.name} successfully updated`,
-            project
+            project,
+            projectDrawings
         });
     } catch(error) {
         return res.status(500).json({
@@ -227,7 +235,7 @@ async function deleteProject(req, res) {
         
         return res.status(200).json({
             success: true,
-            message: `${deletedProject.name} deleted with its ${resultObject.deletedCount} drawings.`
+            message: `${deletedProject.name} deleted.`
         });
     } catch(error) {
         return res.status(500).json({
