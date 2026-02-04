@@ -65,7 +65,7 @@ export function FileDropzone({selectedFile, onFileSelect, disabled}) {
                         <div className="card-actions">
                             <button 
                                 type="button"
-                                className="btn btn-primary"
+                                className="btn btn-error"
                                 onClick={() => onFileSelect(null)}
                                 disabled={disabled}
                             >

@@ -9,3 +9,4 @@ export {TeamIcon} from './TeamIcon';
 export {CanvasIcon} from './CanvasIcon';
 export {CreateNewProjectIcon} from './CreateNewProjectIcon';
 export {CancelIcon} from './CancelIcon';
+export {BackIcon} from './BackIcon';

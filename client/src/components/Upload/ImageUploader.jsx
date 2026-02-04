@@ -1,14 +1,13 @@
 import {useState, useEffect} from 'react';
 import { FileDropzone } from './FileDropzone';
-import { SuccessMessage } from '../SuccessMessage';
 import { ErrorMessage } from '../ErrorMessage';
 import { UploadProgress } from './UploadProgress';
 import { StyleSelector } from './StyleSelector';
 import { ProjectSelector } from '../Projects/ProjectSelector';
+import { DrawingViewer } from '../Drawings/DrawingViewer';
 import { useUpload } from '../../hooks/useUpload';
 import { useAuthContext } from '../../hooks/useAuthContext';
 import { useProjectsContext } from '../../hooks/useProjectsContext';
-import { Dock } from '../../pages/dashboard/Dock';
 
 export function ImageUploader() {
     const [selectedFile, setSelectedFile] = useState(null);
@@ -22,7 +21,8 @@ export function ImageUploader() {
         status,
         error,
         drawingId,
-        uploadImage
+        uploadImage,
+        reset
     } = useUpload();
 
     const {user} = useAuthContext();
@@ -130,15 +130,28 @@ export function ImageUploader() {
             {status === 'uploading' && <UploadProgress status='uploading' progress={uploadProgress} />}
             {status === 'processing' && <UploadProgress status='processing' progress={uploadProgress} />}
             {status === 'error' && <ErrorMessage message={error} />}
-            {status === 'success' && <SuccessMessage message={`Success! Drawing ID: ${drawingId}`} />}
 
-            <button 
-                className="btn btn-secondary"
-                onClick={handleSubmit}
-                disabled={status === 'uploading' || status === 'processing'}
-            >
-                Upload
-            </button>
+            {status === 'success' && drawingId && (
+                <div className="mt-6">
+                    <DrawingViewer drawingId={drawingId} />
+                    <button
+                        className="btn btn-outline mt-4"
+                        onClick={reset}
+                    >
+                        Upload Another Image
+                    </button>
+                </div>
+            )}
+
+            {status !== 'success' && (
+                <button
+                    className="btn btn-secondary"
+                    onClick={handleSubmit}
+                    disabled={status === 'uploading' || status === 'processing'}
+                >
+                    Upload
+                </button>
+            )}
         </div>
     );
 }

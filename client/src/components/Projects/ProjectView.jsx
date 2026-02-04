@@ -88,7 +88,7 @@ export function ProjectView({projectId: propProjectId}) {
 
                 </ul>
 
-                <NavLink to="/dashboard" state={{activeTab: 'canvas'}}>Create new drawing</NavLink>
+                <NavLink className="btn btn-accent" to="/dashboard" state={{activeTab: 'canvas'}}>Create new drawing</NavLink>
             </>
         )
     }

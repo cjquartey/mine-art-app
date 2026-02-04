@@ -13,7 +13,6 @@ function ProjectsProvider({children}) {
         setLoading(true);
         try {
             const response = await api.get('/projects');
-            console.log(response);
             setOwnedProjects(response.data.userOwnedProjects);
             setCollabProjects(response.data.userCollabProjects);
         } catch(error) {
