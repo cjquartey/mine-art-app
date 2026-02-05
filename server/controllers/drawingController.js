@@ -153,9 +153,40 @@ async function getGuestDrawings(req, res){
     }
 }
 
+async function getDrawingStatus(req, res){
+    try{
+        const {drawingId} = req.params;
+        const drawing = await Drawing.findById(drawingId);
+
+        if (!drawing) return res.status(404).json({
+            success: false,
+            message: `Drawing with id ${drawingId} not found`
+        });
+
+        // Authentication check - validate drawing access
+        const drawingAccess = await validateDrawingAccess(req, res, drawing);
+        if (!drawingAccess.authorised) return res.status(401).json({
+            success: false,
+            message: drawingAccess.reason
+        });
+
+        return res.status(200).json({
+            success: true,
+            status: drawing.status,
+            svgFileId: drawing.svgFileId,
+            errorMessage: drawing.errorMessage
+        })
+    } catch(error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
 module.exports = {
     getDrawingMetadata,
     downloadSVG,
     deleteDrawing,
-    getGuestDrawings
+    getGuestDrawings,
+    getDrawingStatus
 }

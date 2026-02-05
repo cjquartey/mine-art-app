@@ -58,6 +58,13 @@ async function uploadAndProcess(req, res) {
             success: false,
             message: 'Drawing must have a name'
         });
+
+        // Validate drawing style before saving
+        const drawingStyle = req.body.style;
+        if (!drawingStyle) return res.status(400).json({
+            success: false,
+            message: 'A drawing style is required'
+        });
     
         let drawing;
     
@@ -68,8 +75,9 @@ async function uploadAndProcess(req, res) {
                 projectId,
                 creatorId: userId,
                 originalFileName: file.originalname,
-                status: 'processing',
-                processingStartedAt: new Date()
+                originalFilePath: req.file.path,
+                status: 'queued',
+                processedStyle: drawingStyle
             });
         }
     
@@ -79,8 +87,9 @@ async function uploadAndProcess(req, res) {
                 name: drawingName,
                 creatorId: userId,
                 originalFileName: file.originalname,
-                status: 'processing',
-                processingStartedAt: new Date()
+                originalFilePath: req.file.path,
+                status: 'queued',
+                processedStyle: drawingStyle
             });
         }
     
@@ -92,81 +101,24 @@ async function uploadAndProcess(req, res) {
                 isGuest: true,
                 expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
                 originalFileName: file.originalname,
-                status: 'processing',
-                processingStartedAt: new Date()
+                originalFilePath: req.file.path,
+                status: 'queued',
+                processedStyle: drawingStyle
             });
         }
-    
-        // Validate drawing style before saving
-        const drawingStyle = req.body.style;
-        if (!drawingStyle) return res.status(400).json({
-            success: false,
-            message: 'A drawing style is required'
-        });
 
-        await drawing.save();
-    
-        // Call image processing service (mock for now)
-        let svgString;
-        try{
-            svgString = await processImage(req.file.path, drawingStyle);
-        } catch(error) {
-            drawing.status = 'failed';
-            drawing.errorMessage = error.message;
-            await drawing.save();
-            return res.status(500).json({
-                success: false,
-                message: `Error processing image: ${error.message}`,
-                drawingId: drawing._id
-            });
-        }
-    
-        // Process SVG
-        const processedSVG = addPathIds(svgString);
-    
-        // Convert string to stream for GridFS storage
-        const svgStream = Readable.from([processedSVG]);
-    
-        let svgFileId;
-        try{
-            svgFileId = await storeFile(svgStream, `${drawingName}.svg`);
-        } catch(error) {
-            drawing.status = 'failed';
-            drawing.errorMessage = error.message;
-            await drawing.save();
-            return res.status(500).json({
-                success: false,
-                message: `Error storing image: ${error.message}`,
-                drawingId: drawing._id
-            })
-        }
-        
-    
-        // Update SVG
-        drawing.svgFileId = svgFileId;
-        drawing.status = 'complete';
-        drawing.processedStyle = drawingStyle;
         await drawing.save();
     
         return res.status(200).json({
             success: true,
-            drawing: {
-                id: drawing._id, 
-                name: drawing.name, 
-                svgFileId: drawing.svgFileId, 
-                status: drawing.status
-            }
+            drawingId: drawing._id,
+            status: 'queued'
         });
     } catch(error) {
         return res.status(500).json({
             success: false,
             message: error.message
         });
-    } finally {
-        // Cleanup temp file
-        if (tempFilePath && fs.existsSync(tempFilePath)) {
-            fs.unlinkSync(tempFilePath)
-        }
     }
 }
 

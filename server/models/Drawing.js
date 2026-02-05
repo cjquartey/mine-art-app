@@ -43,6 +43,10 @@ const drawingSchema = new Schema({
         type: String
     },
 
+    originalFilePath: {
+        type: String
+    },
+
     processedStyle: {
         type: String,
         // Will later be restricted to an array of style options
@@ -50,7 +54,7 @@ const drawingSchema = new Schema({
 
     status: {
         type: String,
-        enum: ['processing', 'complete', 'failed']
+        enum: ['queued', 'processing', 'complete', 'failed']
     },
 
     errorMessage: {

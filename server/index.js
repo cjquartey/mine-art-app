@@ -8,7 +8,9 @@ const projectRoutes = require('./routes/projectRoutes');
 const authRoutes = require('./routes/authRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const drawingRoutes = require('./routes/drawingRoutes');
+const {fork} = require('child_process');
 
+let workerProcess = null;
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -26,13 +28,35 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+function startWorker() {
+    workerProcess = fork('./workers/imageProcessor.js');
+
+    workerProcess.on('error', (error) => {
+        console.error(`Worker Error: ${error}`);
+    })
+
+    workerProcess.on('exit', (code, signal) => {
+    console.log(`Worker Exited with code ${code}, signal ${signal}`);
+        
+        // Auto-restart if crashed unexpectedly (not manual shutdown)
+        if (code !== 0 && code !== null) {
+            setTimeout(() => {
+                startWorker();
+            }, 5000);
+        }
+    });
+
+    console.log(`Worker started with PID: ${workerProcess.pid}`)
+}
+
 // Connect to database and server
 const startServer = async () => {
     try{
         await connectDB();
         app.listen(PORT, () => {
             console.log(`Server running on Port ${PORT}...`);
-        })
+        });
+        startWorker();
     } catch(error){
         console.log(`Failed to start server! ${error.message}`);
         process.exit(1);
@@ -40,3 +64,22 @@ const startServer = async () => {
 }
 
 startServer();
+
+function shutdown(signal) {    
+    if (workerProcess) {
+        workerProcess.kill('SIGTERM');
+        
+        setTimeout(() => {
+            if (workerProcess && !workerProcess.killed) {
+                workerProcess.kill('SIGKILL');
+            }
+        }, 10000);
+    }
+    
+    setTimeout(() => {
+        process.exit(0);
+    }, 11000);
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));

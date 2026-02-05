@@ -9,6 +9,9 @@ router.get('/session/:sessionId', drawingController.getGuestDrawings);
 // Get SVG document metadata
 router.get('/:drawingId', optionalAuth, drawingController.getDrawingMetadata);
 
+// Get SVG document metadata
+router.get('/:drawingId/status', optionalAuth, drawingController.getDrawingStatus);
+
 // Get actual SVG file
 router.get('/:drawingId/svg', optionalAuth, drawingController.downloadSVG);
 
