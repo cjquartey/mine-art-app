@@ -1,8 +1,11 @@
 import { useDrawing } from '../../hooks/useDrawing';
 import { ErrorMessage } from '../ErrorMessage';
 import {LoadingSpinner} from '../LoadingSpinner';
+import { useNavigate } from 'react-router-dom';
 
-export function DrawingViewer({ drawingId }) {
+export function DrawingViewer({drawingId}) {
+    const navigate = useNavigate();
+
     const {
         svgContent, 
         metadata, 
@@ -40,7 +43,10 @@ export function DrawingViewer({ drawingId }) {
                 />
             </figure>
             <div className="card-actions justify-end p-4 pt-0">
-                <button className="btn btn-accent btn-md">
+                <button 
+                    className="btn btn-accent btn-md"
+                    onClick={() => navigate(`/editor/${drawingId}`)}
+                >
                     Edit drawing
                 </button>
                 <button

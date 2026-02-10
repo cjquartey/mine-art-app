@@ -8,6 +8,7 @@ import { Navbar } from './components/Navbar';
 import { ProjectView } from './components/Projects/ProjectView';
 import { ImageUploader } from './components/Upload/ImageUploader';
 import { ProjectList } from './components/Projects/ProjectList';
+import { EditorPage } from './pages/EditorPage';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/projects" element={<ProtectedRoute><ProjectList /></ProtectedRoute>} />
         <Route path="/projects/:id" element={<ProtectedRoute><ProjectView /></ProtectedRoute>} />
         <Route path="/upload" element={<ImageUploader />} />
+        <Route path="/editor/:drawingId" element={<EditorPage />} />
       </Routes>
     </>
   );
