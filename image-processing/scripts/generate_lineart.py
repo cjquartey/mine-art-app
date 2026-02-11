@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-First part of enerating line art from images
+First part of generating line art from images
 Building from "Learning to Generate Line Drawings" (Chan et al., 2022).
 """
 
@@ -24,7 +24,7 @@ class LineArtGenerator:
         Initialiser for LineArtGenerator object that loads the pre-trained models when instantiated.
 
         Args:
-        models_dir: Path to directory containing model folders (default: '../models')
+            models_dir: Path to directory containing model folders (default: '../models')
         """
 
         self.models_dir = Path(models_dir)
@@ -66,14 +66,14 @@ class LineArtGenerator:
         Load a Generator model for the specified style.
         
         Args:
-        style: 'contour' or 'anime' (text string)
+            style: 'contour' or 'anime' (text string)
             
         Returns:
-        Loaded model ready to generate line art from photos.
+            Loaded model ready to generate line art from photos.
             
         Raises:
-        ValueError: If style is invalid
-        FileNotFoundError: If model file doesn't exist
+            ValueError: If style is invalid
+            FileNotFoundError: If model file doesn't exist
         """
 
         # check is the style is valid/exists in the styles dict
@@ -116,16 +116,16 @@ class LineArtGenerator:
         Generate line art from a photo.
         
         Args:
-        input_path: Path to input photo
-        output_path: Path to save output line art PNG
-        style: 'contour' or 'anime'
+            input_path: Path to input photo
+            output_path: Path to save output line art PNG
+            style: 'contour' or 'anime'
             
         Returns:
-        dictionary with:
-            success (bool): Whether generation succeeded
-            output_path (str): Path to generated image
-            processing_time (float): Time taken in seconds
-            error (str): Error message if failed
+            dictionary with:
+                success (bool): Whether generation succeeded
+                output_path (str): Path to generated image
+                processing_time (float): Time taken in seconds
+                error (str): Error message if failed
         """
         start_time = time.time() # start timer
 
@@ -174,7 +174,7 @@ class LineArtGenerator:
 
 
 def main():
-    """Command-line interface for testing."""
+    """CLI program for testing."""
     import argparse
     
     parser = argparse.ArgumentParser(
