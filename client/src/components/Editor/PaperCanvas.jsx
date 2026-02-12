@@ -1,10 +1,17 @@
 import {useRef, useEffect} from 'react';
 import paper from 'paper';
 
-export function PaperCanvas({svgContent, zoom, onZoomChange}) {
+export function PaperCanvas({svgContent, zoom, onZoomChange, toolMode='select', selectedPathIds=new Set(), onPathSelect}) {
     const containerRef = useRef(null);
     const canvasRef = useRef(null);
     const scopeRef = useRef(null);
+    const toolModeRef = useRef(toolMode);
+    const onPathSelectRef = useRef(onPathSelect);
+
+    useEffect(() => {
+        toolModeRef.current = toolMode;
+        onPathSelectRef.current = onPathSelect;
+    }, [toolMode, onPathSelect])
 
     useEffect(() => {
         const container = containerRef.current;
@@ -16,9 +23,37 @@ export function PaperCanvas({svgContent, zoom, onZoomChange}) {
         scope.setup(canvas);
         scopeRef.current = scope;
 
+        // Handle click events based on the chosen tool
+        scope.view.onMouseDown = (event) => {
+            if (toolModeRef.current === 'select') {
+                const hitOptions = {
+                    segments: true,
+                    stroke: true,
+                    fill: true,
+                    tolerance: 5
+                }
+
+                const hitResult = scope.project.hitTest(event.point, hitOptions);
+                
+                if (hitResult) {
+                    console.log('Hit results', hitResult);
+                    console.log(`Item name: ${hitResult.item.name}, ItemType: ${(typeof(hitResult.item.name))}`);
+                    const targetPath = hitResult.item;
+                    console.log('Target path', targetPath);
+                    console.log('Target path bounds', targetPath.bounds);
+                    const pathId = targetPath.name;
+                    onPathSelectRef.current?.(pathId, event.event);
+                } else {
+                    // Clicked empty area - clear selection
+                    onPathSelectRef.current?.(null, event.event);
+                }
+            }
+        }
         // Pan canvas on mouse drag
         scope.view.onMouseDrag = (event) => {
-            scope.view.center = scope.view.center.subtract(event.delta);
+            if (toolModeRef.current === 'pan') {
+                scope.view.center = scope.view.center.subtract(event.delta);
+            }
         }
 
         // Update canvas size on container resize
@@ -46,9 +81,36 @@ export function PaperCanvas({svgContent, zoom, onZoomChange}) {
             const imported = scopeRef.current.project.importSVG(svgContent);
             if (imported) {
                 scopeRef.current.view.center = imported.bounds.center;
+                imported.getItems({class: 'Path'}).forEach(path => console.log(`PathId: ${path.name}`));
             }
         }
     }, [svgContent]);
+
+    // Visual feedback for selected paths
+    useEffect(() => {
+        if (!scopeRef.current) return;
+
+        const paths = scopeRef.current.project.getItems({class: 'Path'});
+        paths.forEach(path => {
+            const pathId = path.name;
+            if (selectedPathIds.has(pathId)) {
+                // Store original path styles
+                if (!path.data.originalStroke) {
+                    path.data.originalStroke = path.strokeColor?.clone();
+                    path.data.originalStrokeWidth = path.strokeWidth;
+                }
+                // Apply selection style
+                path.strokeWidth = path.data.originalStrokeWidth + 2;
+                path.selected = true;
+            } else {
+                // Restore original styles
+                if (path.data.originalStroke) {
+                    path.strokeWidth = path.data.originalStrokeWidth;
+                }
+                path.selected = false;
+            }
+        })
+    }, [selectedPathIds]);
 
     // Apply zoom from prop
     useEffect(() => {
