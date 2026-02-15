@@ -20,12 +20,15 @@ image-processing/
 │   └── feats2Geom/
 │       └── feats2depth.pth
 ├── scripts/             # Python pipeline scripts
-│   ├── generate_lineart.py
-│   ├── vectorize_lineart.py
-│   ├── model.py
+│   ├── pipeline.py              # End-to-end pipeline
+│   ├── pipeline_utils.py        # Helper functions
+│   ├── generate_lineart.py      # Step 1: Photo to line art
+│   ├── vectorize_lineart.py     # Step 2: Line art to SVG
+│   ├── model.py                 # Generator architecture
 │   └── requirements.txt
 ├── outputs/             # Generated line art and SVG files
-└── temp/                # Temporary processing files
+├── temp/                # Temporary processing files (auto-created and cleaned up)
+└── test_images/         # Test photos
 ```
 
 ## Setup
@@ -55,44 +58,37 @@ The pre-trained `.pth` files are in:
 
 ## Usage
 
-### 1: Generate Line Art
+Single command to go from a photo to svg
 
-Convert photo to line art PNG:
-
-```bash
+```
 cd scripts
 
 # Contour style
-python generate_lineart.py input.jpg ../outputs/lineart.png --style contour
+python pipeline.py photo.jpg ../outputs/drawing.svg --style contour
 
 # Anime style
-python generate_lineart.py input.jpg ../outputs/lineart.png --style anime
+python pipeline.py photo.jpg ../outputs/drawing.svg --style anime
 ```
 
-**Output:** PNG line art image
+Output: Final SVG ready for our web editor
 
-### 2: Vectorize to SVG
+What it does:
 
-Convert line art PNG to editable SVG:
+- Generates line art PNG (saved to temp/)
+- Vectorizes to SVG (saved to outputs/)
+- Auto-cleans temp files
+- Returns combined metadata
 
-```bash
-# Vectorize contour style
+
+Optionally, you can also run individual steps separately
+
+**Step 1: Generate Line Art**
+```
+python generate_lineart.py input.jpg ../outputs/lineart.png --style contour
+```
+**Step 2: Vectorise to SVG**
+```
 python vectorize_lineart.py ../outputs/lineart.png ../outputs/drawing.svg --style contour
-
-# Vectorize anime style
-python vectorize_lineart.py ../outputs/lineart.png ../outputs/drawing.svg --style anime
-```
-
-**Output:** SVG with editable paths
-
-### Full Pipeline Example
-
-```bash
-# Complete workflow
-python generate_lineart.py photo.jpg ../outputs/horse_lineart.png --style contour
-python vectorize_lineart.py ../outputs/horse_lineart.png ../outputs/horse.svg --style contour
-
-# Result: horse.svg ready for web editor
 ```
 
 ## Output Formats
