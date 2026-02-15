@@ -1,7 +1,7 @@
 import {useRef, useEffect} from 'react';
 import paper from 'paper';
 
-export function PaperCanvas({svgContent, zoom, onZoomChange, toolMode='select', selectedPathIds=new Set(), onPathSelect}) {
+export function PaperCanvas({svgContent, zoom, onZoomChange, toolMode='select', selectedPathIds=new Set(), onPathSelect, onPan}) {
     const containerRef = useRef(null);
     const canvasRef = useRef(null);
     const scopeRef = useRef(null);
@@ -53,6 +53,7 @@ export function PaperCanvas({svgContent, zoom, onZoomChange, toolMode='select', 
         scope.view.onMouseDrag = (event) => {
             if (toolModeRef.current === 'pan') {
                 scope.view.center = scope.view.center.subtract(event.delta);
+                onPan?.(scope.view.center);
             }
         }
 
