@@ -5,13 +5,15 @@ import { LeftSidebar } from "../components/Editor/LeftSidebar";
 import { useParams } from 'react-router-dom';
 import { useDrawing } from '../hooks/useDrawing';
 import { useSelection } from '../components/Editor/hooks/useSelection';
+import { SelectionOverlay } from '../components/Editor/SelectionOverlay';
 
 export function EditorPage() {
     const {drawingId} = useParams();
     const {svgContent} = useDrawing(drawingId);
     const [zoom, setZoom] = useState(1);
     const [toolMode, setToolMode] = useState('select');
-    const {selectedPathIds, selectPath, clearSelection} = useSelection();
+    const [panTrigger, setPanTrigger] = useState(null);
+    const {selectedPathIds, getSelectionBounds, selectPath, clearSelection} = useSelection();
 
     useEffect(() => {
         console.log(selectedPathIds);
@@ -36,6 +38,18 @@ export function EditorPage() {
                             toolMode={toolMode}
                             selectedPathIds={selectedPathIds} 
                             onPathSelect={handlePathSelect}
+                            onPan={setPanTrigger}
+                        />
+                        <SelectionOverlay
+                            containerRef={containerRef}
+                            scopeRef={scopeRef}
+                            selectedPathIds={selectedPathIds}
+                            getSelectionBounds={getSelectionBounds}
+                            zoom={zoom}
+                            onTransformStart={onTransformStart}
+                            onTransformEnd={onTransformEnd}
+                            onTransform={onTransform}
+                            panTrigger={panTrigger}
                         />
                     </div>
                 </div>
