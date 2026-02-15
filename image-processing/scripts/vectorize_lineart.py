@@ -22,21 +22,21 @@ class LineArtVectorizer:
         # Style-specific parameters
         self.style_configs = {
             'contour': {
-                # Brightness cutoff: pixels darker than this become lines, lighter become background.
+                # pixels darker than this become lines, lighter become background.
                 'threshold': 128,
                 
-                # Noise filter: ignores any tiny specks smaller than 2 pixels.
-                'turdsize': 2,
+                # ignores any tiny specks smaller than 5 pixels.
+                'turdsize': 5,
                 
                 # Corner sharpness: 1.0 is standard; lower makes it more "boxy," higher makes it smoother.
                 'alphamax': 1.0,
                 
-                # Path simplification: how much the SVG can "stray" from the original pixels to stay smooth.
-                'opttolerance': 0.2,
+                # how much the SVG can "stray" from the original pixels to stay smooth.
+                'opttolerance': 0.2
             },
             'anime': {
                 'threshold': 180, # Anime line art often has thinner lines
-                'turdsize': 1,
+                'turdsize': 5,
                 'alphamax': 1.3,
                 'opttolerance': 0.4
             }
