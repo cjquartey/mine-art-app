@@ -36,16 +36,14 @@ export function useSelection() {
 
     const getSelectionBounds = useCallback((scopeRef) => {
         // Aggregate bounds of all selected paths
-        let combinedBounds = null;
-        let allBounds = [];
+        let selectionBounds = null;
         selectedPathIds.forEach(pathId => {
             const path = scopeRef.current.project.getItem({name: pathId});
             if (path) {
-                combinedBounds = combinedBounds ? combinedBounds.unite(path.bounds) : path.bounds.clone();
-                allBounds.push(path.bounds);
+                selectionBounds = selectionBounds ? selectionBounds.unite(path.bounds) : path.bounds.clone();
             }
         });
-        return {combinedBounds, allBounds};
+        return selectionBounds;
     }, [selectedPathIds]) ;
 
     return {
