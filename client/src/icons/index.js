@@ -10,3 +10,5 @@ export {CanvasIcon} from './CanvasIcon';
 export {CreateNewProjectIcon} from './CreateNewProjectIcon';
 export {CancelIcon} from './CancelIcon';
 export {BackIcon} from './BackIcon';
+export {PanIcon} from './PanIcon';
+export {CursorIcon} from './CursorIcon';
