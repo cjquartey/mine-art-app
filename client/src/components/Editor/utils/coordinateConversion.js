@@ -1,10 +1,9 @@
-export function projectToScreen(point, scope, containerElement) {
+export function projectToScreen(point, scope) {
     const viewPoint = scope.view.projectToView(point);
-    const rect = containerElement.getBoundingClientRect();
 
     const screenPoint = {
-        x: rect.left + viewPoint.x,
-        y: rect.top + viewPoint.y,
+        x: viewPoint.x,
+        y: viewPoint.y,
     }
     
     return screenPoint;
@@ -20,9 +19,9 @@ export function screenToProject(screenX, screenY, scope, containerElement) {
     return projectPoint;
 }
 
-export function boundsToScreenRect(paperBounds, scope, containerElement) {
-    const topLeft = projectToScreen(paperBounds.topLeft, scope, containerElement);
-    const bottomRight = projectToScreen(paperBounds.bottomRight, scope, containerElement);
+export function boundsToScreenRect(paperBounds, scope) {
+    const topLeft = projectToScreen(paperBounds.topLeft, scope);
+    const bottomRight = projectToScreen(paperBounds.bottomRight, scope);
 
     const screenRect = {
         left: topLeft.x,
