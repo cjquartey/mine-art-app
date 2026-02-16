@@ -11,7 +11,7 @@ export function EditorPage() {
     const {drawingId} = useParams();
     const {svgContent} = useDrawing(drawingId);
     const [zoom, setZoom] = useState(1);
-    const [toolMode, setToolMode] = useState('select');
+    const [toolMode, setToolMode] = useState('Select');
     const [panTrigger, setPanTrigger] = useState(null);
     const {selectedPathIds, getSelectionBounds, selectPath, clearSelection} = useSelection();
     const paperCanvasRef = useRef(null);
@@ -19,6 +19,14 @@ export function EditorPage() {
     useEffect(() => {
         console.log(selectedPathIds);
     }, [selectedPathIds]);
+
+    useEffect(() => {
+        console.log(toolMode);
+    }, [toolMode]);
+
+    function handleToolSelect(toolType) {
+        setToolMode(toolType);
+    }
 
     function handlePathSelect(pathId, nativeEvent) {
         if (pathId === null) clearSelection();
@@ -42,7 +50,12 @@ export function EditorPage() {
             <div className="drawer lg:drawer-open h-full">
                 <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
                 <div className="drawer-content flex flex-col h-full overflow-hidden">
-                    <TopToolbar zoom={zoom} onZoomChange={setZoom} />
+                    <TopToolbar
+                        zoom={zoom}
+                        onZoomChange={setZoom}
+                        activeTool={toolMode}
+                        onToolSelect={handleToolSelect}
+                    />
                     <div className="relative flex-1 overflow-hidden">
                         <PaperCanvas
                             svgContent={svgContent}

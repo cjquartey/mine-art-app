@@ -5,8 +5,8 @@ export function PaperCanvas({
     svgContent,
     zoom,
     onZoomChange,
-    toolMode='select',
-    selectedPathIds=new Set(),
+    toolMode='Select',
+    selectedPathIds,
     onPathSelect, 
     onPan,
     ref
@@ -39,7 +39,7 @@ export function PaperCanvas({
 
         // Handle click events based on the chosen tool
         scope.view.onMouseDown = (event) => {
-            if (toolModeRef.current === 'select') {
+            if (toolModeRef.current === 'Select') {
                 const hitOptions = {
                     segments: true,
                     stroke: true,
@@ -65,7 +65,7 @@ export function PaperCanvas({
         }
         // Pan canvas on mouse drag
         scope.view.onMouseDrag = (event) => {
-            if (toolModeRef.current === 'pan') {
+            if (toolModeRef.current === 'Pan') {
                 scope.view.center = scope.view.center.subtract(event.delta);
                 onPan?.(scope.view.center);
             }
