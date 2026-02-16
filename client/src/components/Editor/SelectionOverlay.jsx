@@ -3,26 +3,30 @@ import { TransformHandles } from './TransformHandles';
 import { boundsToScreenRect } from './utils/coordinateConversion';
 
 export function SelectionOverlay({
-    containerRef, 
-    scopeRef, 
+    paperCanvasRef, 
     selectedPathIds, 
     getSelectionBounds, 
-    zoom, onTransform, 
+    zoom, 
+    onTransform, 
     onTransformStart, 
     onTransformEnd, 
     panTrigger
 }) {
     const [selectionBounds, setSelectionBounds] = useState([]);
     const [combinedSelectionBounds, setCombinedSelectionBounds] = useState(null);
+
     
     useEffect(() => {
+        const scopeRef = paperCanvasRef.current?.getScope();
+        // const containerRef = paperCanvasRef.current?.getContainer();
+
         const {combinedBounds, allBounds} = getSelectionBounds(scopeRef);
 
         if(combinedBounds !== null && allBounds.length > 0){
-            const aggregateBounds = boundsToScreenRect(combinedBounds, scopeRef.current, containerRef.current);
+            const aggregateBounds = boundsToScreenRect(combinedBounds, scopeRef.current);
             setCombinedSelectionBounds(aggregateBounds);
 
-            const individualBounds = allBounds.map(bounds => boundsToScreenRect(bounds, scopeRef.current, containerRef.current));
+            const individualBounds = allBounds.map(bounds => boundsToScreenRect(bounds, scopeRef.current));
             setSelectionBounds(individualBounds);
         }
 
