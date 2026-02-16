@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PaperCanvas } from "../components/Editor/PaperCanvas";
 import { TopToolbar } from "../components/Editor/TopToolbar";
 import { LeftSidebar } from "../components/Editor/LeftSidebar";
@@ -14,6 +14,7 @@ export function EditorPage() {
     const [toolMode, setToolMode] = useState('select');
     const [panTrigger, setPanTrigger] = useState(null);
     const {selectedPathIds, getSelectionBounds, selectPath, clearSelection} = useSelection();
+    const paperCanvasRef = useRef(null);
 
     useEffect(() => {
         console.log(selectedPathIds);
@@ -24,13 +25,25 @@ export function EditorPage() {
         else selectPath(pathId, nativeEvent.shiftKey) // Shift for mulitple path selection
     }
 
+    function onTransformStart() {
+        console.log('Transformation starting...');
+    }
+
+    function onTransform() {
+        console.log('Transforming...');
+    }
+
+    function onTransformEnd() {
+        console.log('Transformation ended!');
+    }
+
     return (
         <div className="h-[calc(100vh-64px)] w-full overflow-hidden">
             <div className="drawer lg:drawer-open h-full">
                 <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
                 <div className="drawer-content flex flex-col h-full overflow-hidden">
                     <TopToolbar zoom={zoom} onZoomChange={setZoom} />
-                    <div className="flex-1 overflow-hidden">
+                    <div className="relative flex-1 overflow-hidden">
                         <PaperCanvas
                             svgContent={svgContent}
                             zoom={zoom}
@@ -39,10 +52,11 @@ export function EditorPage() {
                             selectedPathIds={selectedPathIds} 
                             onPathSelect={handlePathSelect}
                             onPan={setPanTrigger}
+                            ref={paperCanvasRef}
                         />
-                        <SelectionOverlay
-                            containerRef={containerRef}
-                            scopeRef={scopeRef}
+
+                        {selectedPathIds.size > 0 && <SelectionOverlay
+                            paperCanvasRef={paperCanvasRef}
                             selectedPathIds={selectedPathIds}
                             getSelectionBounds={getSelectionBounds}
                             zoom={zoom}
@@ -50,7 +64,7 @@ export function EditorPage() {
                             onTransformEnd={onTransformEnd}
                             onTransform={onTransform}
                             panTrigger={panTrigger}
-                        />
+                        />}
                     </div>
                 </div>
                 <LeftSidebar />

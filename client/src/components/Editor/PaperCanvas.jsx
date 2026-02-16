@@ -1,12 +1,26 @@
-import {useRef, useEffect} from 'react';
+import {useImperativeHandle, useRef, useEffect} from 'react';
 import paper from 'paper';
 
-export function PaperCanvas({svgContent, zoom, onZoomChange, toolMode='select', selectedPathIds=new Set(), onPathSelect, onPan}) {
+export function PaperCanvas({
+    svgContent,
+    zoom,
+    onZoomChange,
+    toolMode='select',
+    selectedPathIds=new Set(),
+    onPathSelect, 
+    onPan,
+    ref
+}) {
     const containerRef = useRef(null);
     const canvasRef = useRef(null);
     const scopeRef = useRef(null);
     const toolModeRef = useRef(toolMode);
     const onPathSelectRef = useRef(onPathSelect);
+
+    useImperativeHandle(ref, () => ({
+        getScope: () => scopeRef,
+        getContainer: () => containerRef
+    }));
 
     useEffect(() => {
         toolModeRef.current = toolMode;
