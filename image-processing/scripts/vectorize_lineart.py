@@ -8,6 +8,7 @@ import time
 import json
 import subprocess
 from pathlib import Path
+import cv2
 
 from PIL import Image
 import numpy as np
@@ -117,25 +118,22 @@ class LineArtVectorizer:
     
     def _preprocess_image(self, input_path, threshold):
         """
-        Convert image to binary with threshold.
-        
+        Convert image to binary using Otsu's thresholding.
+
         Args:
             input_path: Path to input image
-            threshold: Threshold value (0-255)
-            
+            threshold: Ignored (kept for API compatibility); Otsu computes optimal threshold automatically
+
         Returns:
             Path to binary PBM file
         """
         # Load image as grayscale
-        image = Image.open(input_path).convert('L')
-        
-        # Convert to numpy array
-        image_array = np.array(image)
-        
-        # Apply threshold: pixels > threshold become white (255)
-        binary = (image_array > threshold).astype(np.uint8) * 255
-        
-        # Convert back to PIL image
+        image_array = cv2.imread(input_path, cv2.IMREAD_GRAYSCALE)
+
+        # Apply Otsu's thresholding (automatically determines optimal threshold for doing binary segmentation)
+        _, binary = cv2.threshold(image_array, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        # Convert to PIL image
         binary_image = Image.fromarray(binary)
         
         # Save as PBM (Potrace's preferred format)

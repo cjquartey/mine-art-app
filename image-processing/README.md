@@ -156,6 +156,5 @@ The analyser checks four things: luminance (grid-based uneven lighting detection
 
 ### Vectorization
 - Uses Potrace for raster-to-vector conversion
-- Style-specific threshold preprocessing
-- Binary conversion with numpy
-- Potrace CLI with optimized parameters
+- **Otsu's thresholding** for binarization — automatically picks the optimal threshold per image instead of a fixed value, which works really well for anime style in particular (joins broken lines and produces much cleaner paths)
+- Potrace CLI with optimized parameters per style
