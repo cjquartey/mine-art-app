@@ -288,7 +288,7 @@ def check_contrast(gray_image):
     }
 
 
-def analyze_image(image_path):
+def analyse_image(image_path):
     """
     Run all analysis functions on an image.
     
@@ -348,7 +348,7 @@ def main():
     args = parser.parse_args()
     
     # Analyze
-    results = analyze_image(args.image)
+    results = analyse_image(args.image)
     
     # Print results
     print(json.dumps(results, indent=2))

@@ -4,9 +4,11 @@ Line art generation and vectorization for mine-art-app capstone project.
 
 ## Overview
 
-Two-step pipeline:
-1. **Generate line art** from photos using pre-trained deep learning models
-2. **Vectorize to SVG** for web-based editing with Paper.js
+Pipeline:
+1. **Analyse** image quality (brightness, contrast, blur, resolution)
+2. **Preprocess** conditionally based on analysis (contour style only)
+3. **Generate line art** from photos using pre-trained deep learning models
+4. **Vectorize to SVG** for web-based editing with Paper.js
 
 ## Structure
 
@@ -22,6 +24,8 @@ image-processing/
 ├── scripts/             # Python pipeline scripts
 │   ├── pipeline.py              # End-to-end pipeline
 │   ├── pipeline_utils.py        # Helper functions
+│   ├── image_analyser.py        # Image quality analysis
+│   ├── preprocess.py            # Conditional image preprocessing
 │   ├── generate_lineart.py      # Step 1: Photo to line art
 │   ├── vectorize_lineart.py     # Step 2: Line art to SVG
 │   ├── model.py                 # Generator architecture
@@ -58,35 +62,55 @@ The pre-trained `.pth` files are in:
 
 ## Usage
 
-Single command to go from a photo to svg
+Single command to go from a photo to SVG:
 
 ```
 cd scripts
 
-# Contour style
+# Contour style (full preprocessing)
 python pipeline.py photo.jpg ../outputs/drawing.svg --style contour
 
-# Anime style
+# Anime style (resize only, gamma/CLAHE skipped)
 python pipeline.py photo.jpg ../outputs/drawing.svg --style anime
+
+# Skip preprocessing manually
+python pipeline.py photo.jpg ../outputs/drawing.svg --style contour --skip-preprocess
 ```
 
 Output: Final SVG ready for our web editor
 
 What it does:
 
+- Analyses image quality (brightness, contrast, blur, resolution)
+- Preprocesses if needed (contour style only)
 - Generates line art PNG (saved to temp/)
 - Vectorizes to SVG (saved to outputs/)
 - Auto-cleans temp files
-- Returns combined metadata
+- Returns combined metadata with analysis + preprocessing info
 
+Optionally, run individual steps separately:
 
-Optionally, you can also run individual steps separately
+**Analyse image quality**
+```
+python image_analyser.py photo.jpg
+```
 
-**Step 1: Generate Line Art**
+**Preprocess image**
+```
+python preprocess.py photo.jpg preprocessed.jpg
+
+# Force specific corrections
+python preprocess.py photo.jpg preprocessed.jpg --force-gamma 0.7
+python preprocess.py photo.jpg preprocessed.jpg --force-clahe
+python preprocess.py photo.jpg preprocessed.jpg --force-rescale
+```
+
+**Generate Line Art**
 ```
 python generate_lineart.py input.jpg ../outputs/lineart.png --style contour
 ```
-**Step 2: Vectorise to SVG**
+
+**Vectorise to SVG**
 ```
 python vectorize_lineart.py ../outputs/lineart.png ../outputs/drawing.svg --style contour
 ```
@@ -103,6 +127,24 @@ python vectorize_lineart.py ../outputs/lineart.png ../outputs/drawing.svg --styl
 - Editable Bezier curves
 - Control points for manipulation
 - Ready for Paper.js editor
+
+## Preprocessing
+
+Preprocessing is style-aware. Resizing applies to both styles, but gamma correction and CLAHE are **contour only** — the anime model already preserves too many lines, and these corrections amplify that, producing noisy results.
+
+| Step | Contour | Anime |
+|------|---------|-------|
+| Smart resize | yes | yes |
+| Gamma correction | yes | skipped |
+| CLAHE | yes | skipped |
+
+What each step does:
+
+- **Smart resize** — upscales small images (< 512px) and downscales large ones (> 2048px), preserving aspect ratio
+- **Gamma correction** — brightens dark images or tones down overexposed ones when brightness is clearly off (mean < 80 or > 180)
+- **CLAHE** — improves local contrast when the analyser flags low contrast or uneven lighting. Works in LAB colour space so only lightness is touched
+
+The analyser checks four things: luminance (grid-based uneven lighting detection), blur (FFT + local Laplacian), contrast (std dev), and resolution. Warnings are surfaced in the pipeline output.
 
 ## Technical Details
 
