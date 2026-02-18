@@ -50,11 +50,7 @@ export function PaperCanvas({
                 const hitResult = scope.project.hitTest(event.point, hitOptions);
                 
                 if (hitResult) {
-                    console.log('Hit results', hitResult);
-                    console.log(`Item name: ${hitResult.item.name}, ItemType: ${(typeof(hitResult.item.name))}`);
                     const targetPath = hitResult.item;
-                    console.log('Target path', targetPath);
-                    console.log('Target path bounds', targetPath.bounds);
                     const pathId = targetPath.name;
                     onPathSelectRef.current?.(pathId, event.event);
                 } else {
@@ -94,10 +90,7 @@ export function PaperCanvas({
         if (svgContent && scopeRef.current) {
             scopeRef.current.project.clear();
             const imported = scopeRef.current.project.importSVG(svgContent);
-            if (imported) {
-                scopeRef.current.view.center = imported.bounds.center;
-                imported.getItems({class: 'Path'}).forEach(path => console.log(`PathId: ${path.name}`));
-            }
+            if (imported) scopeRef.current.view.center = imported.bounds.center;
         }
     }, [svgContent]);
 

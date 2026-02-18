@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { PaperCanvas } from "../components/Editor/PaperCanvas";
 import { TopToolbar } from "../components/Editor/TopToolbar";
 import { LeftSidebar } from "../components/Editor/LeftSidebar";
@@ -6,23 +6,18 @@ import { useParams } from 'react-router-dom';
 import { useDrawing } from '../hooks/useDrawing';
 import { useSelection } from '../components/Editor/hooks/useSelection';
 import { SelectionOverlay } from '../components/Editor/SelectionOverlay';
+import { useTransform } from '../components/Editor/hooks/useTransform';
 
 export function EditorPage() {
     const {drawingId} = useParams();
     const {svgContent} = useDrawing(drawingId);
+    const {startTransform, updateTransform, applyTransform, cancelTransform} = useTransform();
     const [zoom, setZoom] = useState(1);
     const [toolMode, setToolMode] = useState('Select');
     const [panTrigger, setPanTrigger] = useState(null);
+    const [transformationTrigger, setTransformationTrigger] = useState(null);
     const {selectedPathIds, getSelectionBounds, selectPath, clearSelection} = useSelection();
     const paperCanvasRef = useRef(null);
-
-    useEffect(() => {
-        console.log(selectedPathIds);
-    }, [selectedPathIds]);
-
-    useEffect(() => {
-        console.log(toolMode);
-    }, [toolMode]);
 
     function handleToolSelect(toolType) {
         setToolMode(toolType);
@@ -33,16 +28,18 @@ export function EditorPage() {
         else selectPath(pathId, nativeEvent.shiftKey) // Shift for mulitple path selection
     }
 
-    function onTransformStart() {
-        console.log('Transformation starting...');
+    function onTransformStart(handleType, corner, position, originalBounds) {
+        startTransform(handleType, {corner, position, originalBounds});
     }
 
-    function onTransform() {
-        console.log('Transforming...');
+    function onTransform(position) {
+        updateTransform(paperCanvasRef, position);
+        applyTransform(paperCanvasRef, selectedPathIds);
+        setTransformationTrigger({active: true});
     }
 
     function onTransformEnd() {
-        console.log('Transformation ended!');
+        cancelTransform();
     }
 
     return (
@@ -77,6 +74,7 @@ export function EditorPage() {
                             onTransformEnd={onTransformEnd}
                             onTransform={onTransform}
                             panTrigger={panTrigger}
+                            transformationTrigger={transformationTrigger}
                         />}
                     </div>
                 </div>

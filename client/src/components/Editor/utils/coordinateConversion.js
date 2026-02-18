@@ -1,12 +1,6 @@
-export function projectToScreen(point, scope) {
+export function projectToView(point, scope) {
     const viewPoint = scope.view.projectToView(point);
-
-    const screenPoint = {
-        x: viewPoint.x,
-        y: viewPoint.y,
-    }
-    
-    return screenPoint;
+    return (viewPoint);
 }
 
 export function screenToProject(screenX, screenY, scope, containerElement) {
@@ -19,16 +13,16 @@ export function screenToProject(screenX, screenY, scope, containerElement) {
     return projectPoint;
 }
 
-export function boundsToScreenRect(paperBounds, scope) {
-    const topLeft = projectToScreen(paperBounds.topLeft, scope);
-    const bottomRight = projectToScreen(paperBounds.bottomRight, scope);
+export function boundsToViewRect(paperBounds, scope) {
+    const topLeft = projectToView(paperBounds.topLeft, scope);
+    const bottomRight = projectToView(paperBounds.bottomRight, scope);
 
-    const screenRect = {
+    const viewRect = {
         left: topLeft.x,
         top: topLeft.y,
         width: bottomRight.x - topLeft.x,
         height: bottomRight.y - topLeft.y,
     }
 
-    return screenRect;
+    return viewRect;
 }
