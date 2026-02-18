@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { TransformHandles } from './TransformHandles';
-import { boundsToScreenRect } from './utils/coordinateConversion';
+import { boundsToViewRect } from './utils/coordinateConversion';
 import { BoundingBox } from './BoundingBox';
 
 export function SelectionOverlay({
@@ -11,7 +11,8 @@ export function SelectionOverlay({
     onTransform, 
     onTransformStart, 
     onTransformEnd, 
-    panTrigger
+    panTrigger,
+    transformationTrigger
 }) {
     const [selectionBounds, setSelectionBounds] = useState([]);
     
@@ -22,11 +23,11 @@ export function SelectionOverlay({
         const canvasBounds = getSelectionBounds(scopeRef);
 
         if(canvasBounds !== null){
-            const screenBounds = boundsToScreenRect(canvasBounds, scopeRef.current);
-            setSelectionBounds(screenBounds);
+            const viewBounds = boundsToViewRect(canvasBounds, scopeRef.current);
+            setSelectionBounds(viewBounds);
         }
 
-    }, [selectedPathIds, zoom, panTrigger])
+    }, [selectedPathIds, zoom, panTrigger, transformationTrigger])
     
     if (selectedPathIds.size === 0) return null;
     return (
@@ -39,7 +40,7 @@ export function SelectionOverlay({
                         onDrag={onTransform}
                         onDragEnd={onTransformEnd}
                     />
-                    
+
                     <TransformHandles 
                         bounds={selectionBounds}
                         onDragStart={onTransformStart}

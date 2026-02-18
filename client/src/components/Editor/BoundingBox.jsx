@@ -15,21 +15,19 @@ export function BoundingBox({bounds, onDrag, onDragStart, onDragEnd}) {
         const startY = e.clientY;
 
         function moveBox(e) {
-            const deltaX = e.clientX - startX;
-            const deltaY = e.clientY - startY;
-            onDrag('move', {x: e.clientX, y: e.clientY}, {deltaX, deltaY});
+            onDrag({x: e.clientX, y: e.clientY});
         }
 
         function releaseBox(e) {
             document.removeEventListener('mousemove', moveBox);
             document.removeEventListener('mouseup', releaseBox);
-            onDragEnd('move', {x: e.clientX, y: e.clientY});
+            onDragEnd({x: e.clientX, y: e.clientY});
         }
 
         document.addEventListener('mousemove', moveBox);
         document.addEventListener('mouseup', releaseBox);
 
-        onDragStart('move', {x: startX, y: startY});
+        onDragStart('move', null, {x: startX, y: startY}, bounds);
     }
 
     return (

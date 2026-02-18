@@ -1,9 +1,9 @@
 export function TransformHandles({bounds, onDragStart, onDrag, onDragEnd}) {
     const handles = [
-        {type: 'corner-tl', x: bounds.left, y: bounds.top},
-        {type: 'corner-tr', x: bounds.left + bounds.width, y: bounds.top},
-        {type: 'corner-bl', x: bounds.left, y: bounds.top + bounds.height},
-        {type: 'corner-br', x: bounds.left + bounds.width, y: bounds.top + bounds.height},
+        {type: 'scale', corner: 'tl', x: bounds.left, y: bounds.top},
+        {type: 'scale', corner: 'tr', x: bounds.left + bounds.width, y: bounds.top},
+        {type: 'scale', corner: 'bl', x: bounds.left, y: bounds.top + bounds.height},
+        {type: 'scale', corner: 'br', x: bounds.left + bounds.width, y: bounds.top + bounds.height},
         {type: 'rotate', x: bounds.left + (bounds.width / 2), y: bounds.top - 30}
     ];
 
@@ -17,28 +17,26 @@ export function TransformHandles({bounds, onDragStart, onDrag, onDragEnd}) {
         transform: 'translate(-50%, -50%)'
     }
 
-    function clickHandle(e, handleType) {
+    function clickHandle(e, handleType, corner='') {
         e.stopPropagation();
 
         const startX = e.clientX;
         const startY = e.clientY;
 
         function moveHandle(e) {
-            const deltaX = e.clientX - startX;
-            const deltaY = e.clientY - startY;
-            onDrag(handleType, {x: e.clientX, y: e.clientY}, {deltaX, deltaY});
+            onDrag({x: e.clientX, y: e.clientY});
         }
 
         function releaseHandle(e) {
             document.removeEventListener('mousemove', moveHandle);
             document.removeEventListener('mouseup', releaseHandle);
-            onDragEnd(handleType, {x: e.clientX, y: e.clientY});
+            onDragEnd({x: e.clientX, y: e.clientY});
         }
 
         document.addEventListener('mousemove', moveHandle);
         document.addEventListener('mouseup', releaseHandle);
         
-        onDragStart(handleType, {x: startX, y: startY});
+        onDragStart(handleType, corner,{x: startX, y: startY}, bounds);
     }
 
     return (
@@ -56,7 +54,7 @@ export function TransformHandles({bounds, onDragStart, onDrag, onDragEnd}) {
                     onMouseDown={(e) => clickHandle(e, handlePoint.type)}
                 />
 
-                else if (handlePoint.type === 'corner-tl' || handlePoint.type === 'corner-br') return <div 
+                else if (handlePoint.corner === 'tl' || handlePoint.corner === 'br') return <div 
                     key={index}
                     style={{
                         ...baseHandleStyle,
@@ -65,10 +63,10 @@ export function TransformHandles({bounds, onDragStart, onDrag, onDragEnd}) {
                         cursor: 'nwse-resize',
                         borderRadius: '0'
                     }}
-                    onMouseDown={(e) => clickHandle(e, handlePoint.type)}
+                    onMouseDown={(e) => clickHandle(e, handlePoint.type, handlePoint.corner)}
                 />
 
-                else if (handlePoint.type === 'corner-tr' || handlePoint.type === 'corner-bl') return <div 
+                else if (handlePoint.corner === 'tr' || handlePoint.corner === 'bl') return <div 
                     key={index}
                     style={{
                         ...baseHandleStyle,
@@ -77,7 +75,7 @@ export function TransformHandles({bounds, onDragStart, onDrag, onDragEnd}) {
                         cursor: 'nesw-resize',
                         borderRadius: '0'
                     }}
-                    onMouseDown={(e) => clickHandle(e, handlePoint.type)}
+                    onMouseDown={(e) => clickHandle(e, handlePoint.type, handlePoint.corner)}
                 /> 
             })}
         </>
