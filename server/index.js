@@ -8,6 +8,7 @@ const projectRoutes = require('./routes/projectRoutes');
 const authRoutes = require('./routes/authRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const drawingRoutes = require('./routes/drawingRoutes');
+const userRoutes = require('./routes/userRoutes');
 const {fork} = require('child_process');
 
 let workerProcess = null;
@@ -20,6 +21,7 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/drawings', drawingRoutes);
+app.use('/api/users', userRoutes);
 
 app.get('/api/health', (req, res) => {
     res.json({
