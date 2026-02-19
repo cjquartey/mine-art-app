@@ -15,7 +15,7 @@ function AuthProvider({children}) {
             if (token) {
                 try{
                     // Verify token is valid with API endpoint
-                    const response = await api.get('/auth/profile');
+                    const response = await api.get('/users/profile');
                     // Set user state upon a successful response
                     setUser(response.data.user);
                 } catch(error) {
