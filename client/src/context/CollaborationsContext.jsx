@@ -60,6 +60,7 @@ function CollaborationsProvider({children}) {
         try {
             setError(null);
             await api.delete(`/collaborations/projects/${projectId}/leave`);
+            await fetchRequests();
         } catch(error) {
             setError(error.response?.data?.message);
             throw new Error(error.response?.data?.message);
