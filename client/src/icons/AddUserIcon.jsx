@@ -1,0 +1,5 @@
+export function AddUserIcon() {
+    return (
+        <svg className="size-[1.2em]" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="add-user-left-7" transform="translate(-2 -2)"> <path id="secondary" fill="#2ca9bc" d="M17.29,13.19a6,6,0,0,1-8.58,0A5,5,0,0,0,5,18v1s2,2,8,2,8-2,8-2V18a5,5,0,0,0-3.71-4.81Z"></path> <path id="primary" d="M7,5H3M5,3V7" fill="none" stroke="#000000" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path> <path id="primary-2" dataname="primary" d="M7.35,11A6,6,0,1,0,13,3a5.8,5.8,0,0,0-2,.35" fill="none" stroke="#000000" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path> <path id="primary-3" dataname="primary" d="M17.29,13.19A5,5,0,0,1,21,18v1s-2,2-8,2-8-2-8-2V18a5,5,0,0,1,3.71-4.81" fill="none" stroke="#000000" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path> </g> </g></svg>
+    )
+}

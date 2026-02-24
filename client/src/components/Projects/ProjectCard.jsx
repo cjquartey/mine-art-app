@@ -1,7 +1,9 @@
 import { useNavigate } from 'react-router-dom';
+import { useAuthContext } from '../../hooks/useAuthContext';
 
-export function ProjectCard({project, onProjectDelete}) {
+export function ProjectCard({project, onProjectDelete, onProjectLeave}) {
     const navigate = useNavigate();
+    const {user} = useAuthContext();
 
     async function navigateToProject() {
         navigate('/dashboard', {state: {activeTab: 'project', projectId: project._id}});
@@ -27,7 +29,12 @@ export function ProjectCard({project, onProjectDelete}) {
                     >
                         View Project
                     </button>
-                    <button type="button" className="btn btn-error" onClick={() => onProjectDelete(project._id)}>Delete</button>
+                    {/*Delete project functionality for owners, leave project functionality for collaborators*/}
+                    {project.ownerId === user.userId.toString() ? (
+                        <button type="button" className="btn btn-error" onClick={() => onProjectDelete(project._id)}>Delete</button>
+                    ) : (
+                        <button type="button" className="btn btn-error" onClick={() => onProjectLeave(project._id)}>Leave Project</button>
+                    )}
                 </div>
             </div>
         </div>

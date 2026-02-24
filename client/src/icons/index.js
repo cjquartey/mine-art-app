@@ -12,3 +12,7 @@ export {CancelIcon} from './CancelIcon';
 export {BackIcon} from './BackIcon';
 export {PanIcon} from './PanIcon';
 export {CursorIcon} from './CursorIcon';
+export {ProfileIcon} from './ProfileIcon';
+export {HelpIcon} from './HelpIcon';
+export {AddUserIcon} from './AddUserIcon';
+export {UndoIcon} from './UndoIcon';

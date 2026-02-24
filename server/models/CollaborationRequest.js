@@ -22,7 +22,7 @@ const collaborationRequestSchema = new Schema({
 
     status: {
         type: String,
-        enum: ['pending', 'accepted', 'rejected'],
+        enum: ['pending', 'accepted', 'rejected', 'left'],
         default: 'pending'
     }
 },{

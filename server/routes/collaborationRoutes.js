@@ -23,4 +23,9 @@ router.patch('/:collabRequestId/reject',
     collaborationController.rejectRequest
 );
 
+router.delete('/projects/:projectId/leave',
+    authMiddleware.verifyToken,
+    collaborationController.leaveCollaboration
+);
+
 module.exports = router;

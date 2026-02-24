@@ -7,8 +7,12 @@ async function getRequests(req, res){
     try {
         const {userId} = req.user;
         const [sentCollabRequests, receivedCollabRequests] = await Promise.all([
-            CollaborationRequest.find({senderId: userId}),
-            CollaborationRequest.find({recipientId: userId})
+            CollaborationRequest.find({senderId: userId}).sort({createdAt: 1})
+                .populate('recipientId', 'firstName lastName username')
+                .populate('projectId', 'name'),
+            CollaborationRequest.find({recipientId: userId}).sort({createdAt: 1})
+                .populate('senderId', 'firstName lastName username')
+                .populate('projectId', 'name')
         ]);
 
         const totalRequestsCount = sentCollabRequests.length + receivedCollabRequests.length;
@@ -50,6 +54,13 @@ async function createRequest(req, res){
             });
         }
 
+        if (userId === recipientId){
+            return res.status(403).json({
+                success: false,
+                message: 'A user cannot send a collaboration request to themself'
+            })
+        }
+
         // Validate whether the user is authorised to access the project
         const projectAccess = validateProjectAccess(userId, project);
         if (!projectAccess.authorised) {
@@ -77,7 +88,14 @@ async function createRequest(req, res){
         if (existingRequest) {
             return res.status(409).json({
                 success: false,
-                message: 'A collaboration request for this user already exists'
+                message: 'A pending collaboration request for this user already exists'
+            });
+        }
+
+        if (project.collaborators.some(id => id.equals(recipientId))) {
+            return res.status(403).json({
+                success: false,
+                message: 'Cannot send a request to an existing collaborator'
             });
         }
 
@@ -130,10 +148,22 @@ async function acceptRequest(req, res){
             });
         }
 
-        collabRequest.status = 'accepted';
-        await collabRequest.save();
-        project.collaborators.push(userId);
-        await project.save();
+        // Only pending requests can be accepted
+        if(collabRequest.status === 'pending') {
+            collabRequest.status = 'accepted';
+            await collabRequest.save();
+        } else {
+            return res.status(403).json({
+                success: false,
+                message: 'Only pending requests can be accepted'
+            });
+        }
+
+        // Only add a user if they don't already exist in the array
+        if (!project.collaborators.some(id => id.equals(userId))) {
+            project.collaborators.push(userId);
+            await project.save();
+        }
 
         return res.status(200).json({
             success: true,
@@ -168,8 +198,16 @@ async function rejectRequest(req, res){
             });
         }
 
-        collabRequest.status = 'rejected';
-        await collabRequest.save();
+        // Only pending requests can be rejected
+        if(collabRequest.status === 'pending') {
+            collabRequest.status = 'rejected';
+            await collabRequest.save();
+        } else {
+            return res.status(403).json({
+                success: false,
+                message: 'Only pending requests can be rejected'
+            });
+        }
 
         return res.status(200).json({
             success: true,
@@ -183,9 +221,60 @@ async function rejectRequest(req, res){
     }
 }
 
+async function leaveCollaboration(req, res){
+    try {
+        const {userId} = req.user;
+        const {projectId} = req.params;
+
+        const project = await Project.findById(projectId);
+
+        if (!project) {
+            return res.status(404).json({
+                success: false,
+                message: `The project for the given request does not exist`
+            });
+        }
+
+        const projectAccess = validateProjectAccess(userId, project);
+
+        if (!projectAccess.authorised) {
+            return res.status(403).json({
+                success: false,
+                message: projectAccess.reason
+            });
+        }
+
+        // Only project collaborators can leave a project, owners must delete
+        if (projectAccess.role === 'Owner') {
+            return res.status(403).json({
+                success: false,
+                message: 'Owners cannot leave a project'
+            });
+        }
+
+        project.collaborators.pull(userId);
+        await CollaborationRequest.updateOne(
+            {projectId: projectId, recipientId: userId, status: 'accepted'},
+            {status: 'left'}
+        );
+        await project.save();
+
+        return res.status(200).json({
+            success: true,
+            message: `Successfully left ${project.name}`
+        });
+    } catch(error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+}
+
 module.exports = {
     getRequests,
     createRequest,
     acceptRequest,
-    rejectRequest
+    rejectRequest,
+    leaveCollaboration
 }

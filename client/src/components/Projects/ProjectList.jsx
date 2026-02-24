@@ -6,6 +6,7 @@ import {CreateProjectModal} from "./CreateProjectModal";
 import { LoadingSpinner } from "../LoadingSpinner";
 import { SuccessMessage } from "../SuccessMessage";
 import { ErrorMessage } from "../ErrorMessage";
+import { useCollaborationsContext } from "../../hooks/useCollaborationsContext";
 
 export function ProjectList() {
     const {
@@ -15,6 +16,8 @@ export function ProjectList() {
         fetchProjects, 
         deleteProject
     } = useProjectsContext();
+
+    const {leaveCollaboration} = useCollaborationsContext();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isProjectDeleted, setIsProjectDeleted] = useState(false);
@@ -36,6 +39,15 @@ export function ProjectList() {
         }
     }
 
+    async function handleLeave(projectId) {
+        try {
+            await leaveCollaboration(projectId);
+            fetchProjects();
+        } catch(error) {
+            setError(error.message);
+        }
+    }
+
     if (loading) {
         return <LoadingSpinner message={"Loading projects..."} />
     }
@@ -50,7 +62,12 @@ export function ProjectList() {
                     <span>No projects yet. Create one now!</span>
                 </div>
 
-                <button className="btn btn-primary"type="button" onClick={() => setIsModalOpen(true)}>Create new project</button>
+                <button 
+                    type="button" 
+                    onClick={() => setIsModalOpen(true)}
+                    className="btn btn-xl btn-warning"
+                >Create new project
+                </button>
                 {isModalOpen && (
                     <CreateProjectModal 
                         isOpen={isModalOpen}
@@ -69,6 +86,12 @@ export function ProjectList() {
                 </svg>
                 <span>You have {ownedProjects.length + collabProjects.length} project(s)</span>
             </div>
+            <button 
+                type="button" 
+                onClick={() => setIsModalOpen(true)}
+                className="btn btn-xl btn-warning"
+            >Create new project
+            </button>
 
             {isProjectDeleted && <SuccessMessage message={deletedProjectMessage} />}
             {error && <ErrorMessage message={error} />}
@@ -77,7 +100,12 @@ export function ProjectList() {
             {ownedProjects.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {ownedProjects.map(project => (
-                        <ProjectCard key={project._id} project={project} onProjectDelete={handleDelete} />
+                        <ProjectCard 
+                            key={project._id}
+                            project={project}
+                            onProjectDelete={handleDelete}
+                            onProjectLeave={handleLeave}
+                        />
                     ))}
                 </div>  
             ) : (
@@ -88,14 +116,18 @@ export function ProjectList() {
             {collabProjects.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {collabProjects.map(project => (
-                        <ProjectCard key={project._id} project={project} onProjectDelete={handleDelete} />
+                        <ProjectCard 
+                            key={project._id}
+                            project={project}
+                            onProjectDelete={handleDelete}
+                            onProjectLeave={handleLeave}
+                        />
                     ))}
                 </div>
             ) : (
                 <p>No collaborative projects</p>
             )}
 
-            <button type="button" onClick={() => setIsModalOpen(true)}>Create new project</button>
             {isModalOpen && (
                 <CreateProjectModal 
                     isOpen={isModalOpen}

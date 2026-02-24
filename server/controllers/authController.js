@@ -112,6 +112,5 @@ function generateToken(userId){
 
 module.exports = {
     register,
-    login,
-    getProfile
+    login
 }
