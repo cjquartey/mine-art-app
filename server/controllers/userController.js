@@ -56,6 +56,7 @@ async function getProfile(req, res) {
             success: true,
             message: 'User found',
             user: {
+                userId: foundUser._id,
                 username: foundUser.username,
                 email: foundUser.email,
                 firstName: foundUser.firstName,

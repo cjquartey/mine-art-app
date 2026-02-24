@@ -54,7 +54,7 @@ function validateProjectAccess(userId, project) {
     };
 
     // Check if user is a collaborator of the project
-    if (project.collaborators.includes(userId.toString())) return {
+    if (project.collaborators.some(id => id.equals(userId))) return {
         authorised: true,
         role: 'Collaborator'
     };
@@ -76,7 +76,10 @@ async function validateDrawingAccess(req, res, drawing) {
 
             // Check if user is a collaborator on the drawing's project
             const project = await Project.findById(drawing.projectId)
-            if (project && project.collaborators.includes(userId.toString())) return {authorised: true};
+            if (project && project.collaborators.some(id => id.equals(userId))) return {authorised: true};
+
+            // Check if user is the owner of the project
+            if (project && project.ownerId.toString() === userId.toString()) return {authorised: true}
 
             return {
                 authorised: false,

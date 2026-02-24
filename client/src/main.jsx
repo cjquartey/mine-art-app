@@ -6,6 +6,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ProjectsProvider } from './context/ProjectsContext'
 import { SessionProvider } from './context/SessionContext.jsx'
 import App from './App.jsx'
+import { CollaborationsProvider } from './context/CollaborationsContext.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -13,7 +14,9 @@ createRoot(document.getElementById('root')).render(
       <AuthProvider>
         <SessionProvider>
           <ProjectsProvider>
-            <App />
+            <CollaborationsProvider>
+              <App />
+            </CollaborationsProvider>
           </ProjectsProvider>
         </SessionProvider>
       </AuthProvider>

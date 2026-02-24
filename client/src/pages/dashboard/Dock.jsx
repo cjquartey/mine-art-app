@@ -1,11 +1,11 @@
-import {HomeIcon, SettingsIcon, ProjectsIcon, CanvasIcon} from '../../icons';
+import {ProfileIcon, ProjectsIcon, CanvasIcon, HelpIcon} from '../../icons';
 
 export function Dock({ activeTab, setActiveTab }) {
     const dockItems = [
-        {id: 'home', label: 'Home', icon: <HomeIcon />},
         {id: 'projects', label: 'Projects', icon: <ProjectsIcon />},
+        {id: 'profile', label: 'Profile', icon: <ProfileIcon />},
         {id: 'canvas', label: 'Canvas', icon: <CanvasIcon />},
-        {id: 'settings', label: 'Settings', icon: <SettingsIcon />}
+        {id: 'help', label: 'Help', icon: <HelpIcon />}
     ];
 
     return (

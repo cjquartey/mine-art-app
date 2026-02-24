@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { useProjectsContext } from "../../hooks/useProjectsContext";
+import { useCollaborationsContext } from "../../hooks/useCollaborationsContext";
 import { ErrorMessage } from "../ErrorMessage";
+import { UserSearch } from "../UserSearch";
 
 export function CreateProjectModal({isOpen, onClose, onProjectCreated}) {
     const [projectName, setProjectName] = useState('');
+    const [collaborators, setCollaborators] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const {createProject} = useProjectsContext();
+    const {createRequest} = useCollaborationsContext();
 
     async function handleCreate() {
         if (!projectName.trim()) {
@@ -19,14 +23,28 @@ export function CreateProjectModal({isOpen, onClose, onProjectCreated}) {
         
         try{
             const newProject = await createProject(projectName);
+            await Promise.all(collaborators.map(
+                c => createRequest(c._id, newProject._id)
+            ))
             if(onProjectCreated) onProjectCreated(newProject);
             setProjectName('');
+            setCollaborators([]);
             onClose();
         } catch(error) {
             setError(error.message);
         } finally {
             setLoading(false)
         }
+    }
+
+    function addCollaborator(collaborator) {
+        setCollaborators(prev => {
+            if (prev.some(c => c._id === collaborator._id)) return prev;
+            else return [...prev, collaborator]
+        });
+    }
+    function removeCollaborator(collaboratorId) {
+        setCollaborators(prev => prev.filter(collaborator => collaborator._id !== collaboratorId));
     }
     return(
         <>
@@ -43,26 +61,12 @@ export function CreateProjectModal({isOpen, onClose, onProjectCreated}) {
                                 value={projectName}
                             />
 
-                            {/*
-                                To be implemented later
-                                Will require modifying the create project endpoint to allow for collaborators array
-                            */}
                             <legend className="fieldset-legend">Collaborators</legend>
-                            <label className="input">
-                                <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                    <g
-                                    strokeLinejoin="round"
-                                    strokeLinecap="round"
-                                    strokeWidth="2.5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    >
-                                    <circle cx="11" cy="11" r="8"></circle>
-                                    <path d="m21 21-4.3-4.3"></path>
-                                    </g>
-                                </svg>
-                                <input type="search" className="grow" placeholder="Search" />
-                            </label>
+                            <UserSearch 
+                                collaborators={collaborators}
+                                addCollaborator={addCollaborator}
+                                removeCollaborator={removeCollaborator}
+                            />
 
                             {error && <ErrorMessage message={error} />}
                             <button 
@@ -84,7 +88,6 @@ export function CreateProjectModal({isOpen, onClose, onProjectCreated}) {
                         </fieldset>
                     </div>
                 </div>
-
             )}
         </>
     )
