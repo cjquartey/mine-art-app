@@ -1,0 +1,25 @@
+2026-02-24 22:26:32,714 - INFO - Starting Image to SVG API server...
+2026-02-24 22:26:32,714 - INFO - Models directory: /Users/ruvarashesadya/Documents/CapstoneProject/mine-art-app/image-processing/scripts/../models
+2026-02-24 22:26:32,715 - INFO - Server will run on http://localhost:8000
+2026-02-24 22:26:32,715 - INFO - API docs available at http://localhost:8000/docs
+2026-02-24 22:27:23,672 - INFO - Processing image e447ffae-a8b4-4d82-9c21-5541c3adc17a with style=anime, skip_preprocess=False
+2026-02-24 22:27:23,988 - INFO - Successfully processed e447ffae-a8b4-4d82-9c21-5541c3adc17a: 82 paths
+2026-02-24 22:35:07,383 - INFO - Analysing image: 1d64d2e1-a05a-4b7b-bd98-09ed72392cf1.png
+2026-02-24 22:36:01,744 - WARNING - Invalid file type uploaded: Computer Vision Final Project.pdf
+2026-02-24 22:37:17,768 - WARNING - Invalid file type uploaded: Ruvarashe Sadya Ashesi Cover Letter NSS.pdf
+2026-02-25 09:02:22,294 - INFO - Starting Image to SVG API server...
+2026-02-25 09:02:22,294 - INFO - Models directory: /Users/ruvarashesadya/Documents/CapstoneProject/mine-art-app/image-processing/scripts/../models
+2026-02-25 09:02:22,294 - INFO - Server will run on http://localhost:8000
+2026-02-25 09:02:22,294 - INFO - API docs available at http://localhost:8000/docs
+2026-02-25 09:03:20,170 - INFO - Processing image 714d18a7-fdeb-44af-866a-147db2048aeb with style=StyleOption.anime, skip_preprocess=False
+2026-02-25 09:03:21,421 - INFO - Successfully processed 714d18a7-fdeb-44af-866a-147db2048aeb: 82 paths
+2026-02-25 09:19:04,927 - INFO - Processing image afbe3304-dcb8-47e1-8ce3-c168ee0c5617 with style=StyleOption.contour, skip_preprocess=False
+2026-02-25 09:19:05,884 - INFO - Successfully processed afbe3304-dcb8-47e1-8ce3-c168ee0c5617: 172 paths
+2026-02-25 09:19:24,951 - INFO - Starting Image to SVG API server...
+2026-02-25 09:19:24,951 - INFO - Models directory: /Users/ruvarashesadya/Documents/CapstoneProject/mine-art-app/image-processing/scripts/../models
+2026-02-25 09:19:24,951 - INFO - Server will run on http://localhost:8000
+2026-02-25 09:19:24,951 - INFO - API docs available at http://localhost:8000/docs
+2026-02-25 09:19:43,115 - INFO - Processing image 861f18ec-3a1b-4e75-8f3c-69721c2128fb with style=StyleOption.anime, skip_preprocess=False
+2026-02-25 09:19:43,413 - INFO - Successfully processed 861f18ec-3a1b-4e75-8f3c-69721c2128fb: 86 paths
+2026-02-25 09:20:30,416 - INFO - Processing image ce769005-6fa6-42d8-b541-c7f35f64a3c1 with style=StyleOption.anime, skip_preprocess=True
+2026-02-25 09:20:30,524 - INFO - Successfully processed ce769005-6fa6-42d8-b541-c7f35f64a3c1: 86 paths
