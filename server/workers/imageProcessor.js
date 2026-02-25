@@ -36,9 +36,9 @@ async function handleJob(drawing) {
         );
 
         const imagePath = drawing.originalFilePath;
-        let svgString;
+        let svgResult; // Declare svgResult here to use it in the catch block if processImage throws an error
         try{
-            svgString = await processImage(imagePath, drawing.processedStyle);
+            svgResult = await processImage(imagePath, drawing.processedStyle);
         } catch(error) {
             await Drawing.findByIdAndUpdate(drawing._id, {
                 status: 'failed',
@@ -46,9 +46,9 @@ async function handleJob(drawing) {
             });
             return;
         }
-    
+
         // Process SVG
-        const processedSVG = addPathIds(svgString);
+        const processedSVG = addPathIds(svgResult.svg);
     
         // Convert string to stream for GridFS storage
         const svgStream = Readable.from([processedSVG]);
