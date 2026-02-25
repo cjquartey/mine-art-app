@@ -64,8 +64,8 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 # Initialising the image-processing pipeline
 pipeline = ImageProcessingPipeline(models_dir=MODELS_DIR)
 
-# File size limit (10MB)
-MAX_FILE_SIZE = 10 * 1024 * 1024
+# File size limit (20MB)
+MAX_FILE_SIZE = 20 * 1024 * 1024
 
 # Style options for SVG generation - shown as a dropdown in the Swagger UI
 class StyleOption(str, Enum):
@@ -166,7 +166,7 @@ def analyse_endpoint(file: UploadFile = File(...)):
     Analyse image quality without processing.
 
     Args:
-        file: Uploaded image file (max 10MB)
+        file: Uploaded image file (max 20MB)
 
     Returns:
         JSON with structured quality analysis results
@@ -192,7 +192,7 @@ def analyse_endpoint(file: UploadFile = File(...)):
         if len(file_bytes) > MAX_FILE_SIZE:
             raise HTTPException(
                 status_code=413,
-                detail=create_error_response("Image too large. Maximum size allowed is 10MB.", "FILE_TOO_LARGE")
+                detail=create_error_response("Image too large. Maximum size allowed is 20MB.", "FILE_TOO_LARGE")
             )
         
         # Generate unique filename using UUID to avoid collisions
@@ -256,7 +256,7 @@ def generate_svg_endpoint(
     Returns SVG content inline (no file storage).
 
     Args:
-        file: Uploaded image file (max 10MB)
+        file: Uploaded image file (max 20MB)
         style: Line art style ('contour' or 'anime')
         skip_preprocess: Skip preprocessing step
 
@@ -274,7 +274,7 @@ def generate_svg_endpoint(
         if len(file_bytes) > MAX_FILE_SIZE:
             raise HTTPException(
                 status_code=413,
-                detail=create_error_response("File too large. Maximum size is 10MB.", "FILE_TOO_LARGE")
+                detail=create_error_response("File too large. Maximum size is 20MB.", "FILE_TOO_LARGE")
             )
 
         # Validate file type

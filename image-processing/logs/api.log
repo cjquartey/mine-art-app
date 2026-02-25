@@ -23,3 +23,32 @@
 2026-02-25 09:19:43,413 - INFO - Successfully processed 861f18ec-3a1b-4e75-8f3c-69721c2128fb: 86 paths
 2026-02-25 09:20:30,416 - INFO - Processing image ce769005-6fa6-42d8-b541-c7f35f64a3c1 with style=StyleOption.anime, skip_preprocess=True
 2026-02-25 09:20:30,524 - INFO - Successfully processed ce769005-6fa6-42d8-b541-c7f35f64a3c1: 86 paths
+2026-02-25 09:46:23,312 - INFO - Starting Image to SVG API server...
+2026-02-25 09:46:23,312 - INFO - Models directory: /Users/ruvarashesadya/Documents/CapstoneProject/mine-art-app/image-processing/scripts/../models
+2026-02-25 09:46:23,313 - INFO - Server will run on http://localhost:8000
+2026-02-25 09:46:23,313 - INFO - API docs available at http://localhost:8000/docs
+2026-02-25 09:55:17,741 - INFO - Starting Image to SVG API server...
+2026-02-25 09:55:17,741 - INFO - Models directory: /Users/ruvarashesadya/Documents/CapstoneProject/mine-art-app/image-processing/scripts/../models
+2026-02-25 09:55:17,741 - INFO - Server will run on http://localhost:8000
+2026-02-25 09:55:17,741 - INFO - API docs available at http://localhost:8000/docs
+2026-02-25 09:59:15,412 - WARNING - Expected boundary character 45, got 91 at index 2
+2026-02-25 10:01:53,753 - WARNING - Expected boundary character 45, got 91 at index 2
+2026-02-25 10:21:05,680 - INFO - Processing image c62900a5-e56c-4c62-9476-2272403195b6 with style=StyleOption.contour, skip_preprocess=False
+2026-02-25 10:21:06,252 - INFO - Successfully processed c62900a5-e56c-4c62-9476-2272403195b6: 52 paths
+2026-02-25 10:50:33,544 - INFO - Processing image 12135281-b41e-4216-a34f-7cd26f0ecf78 with style=StyleOption.anime, skip_preprocess=False
+2026-02-25 10:50:33,812 - INFO - Successfully processed 12135281-b41e-4216-a34f-7cd26f0ecf78: 101 paths
+2026-02-25 11:00:54,085 - INFO - Processing image 24cb5208-fb56-4c60-a034-a44f294f5406 with style=StyleOption.contour, skip_preprocess=False
+2026-02-25 11:00:54,356 - INFO - Successfully processed 24cb5208-fb56-4c60-a034-a44f294f5406: 52 paths
+2026-02-25 11:06:39,002 - INFO - Starting Image to SVG API server...
+2026-02-25 11:06:39,002 - INFO - Models directory: /Users/ruvarashesadya/Documents/CapstoneProject/mine-art-app/image-processing/scripts/../models
+2026-02-25 11:06:39,002 - INFO - Server will run on http://localhost:8000
+2026-02-25 11:06:39,002 - INFO - API docs available at http://localhost:8000/docs
+2026-02-25 12:21:41,940 - INFO - Analysing image: 26bcf799-198d-456b-a55c-391478851475.jpg
+2026-02-25 12:22:18,996 - INFO - Processing image 6c81d5ad-d3a3-4142-a5b0-8ce2331124b0 with style=StyleOption.contour, skip_preprocess=False
+2026-02-25 12:22:19,437 - INFO - Successfully processed 6c81d5ad-d3a3-4142-a5b0-8ce2331124b0: 52 paths
+2026-02-25 12:23:38,721 - INFO - Starting Image to SVG API server...
+2026-02-25 12:23:38,721 - INFO - Models directory: /Users/ruvarashesadya/Documents/CapstoneProject/mine-art-app/image-processing/scripts/../models
+2026-02-25 12:23:38,721 - INFO - Server will run on http://localhost:8000
+2026-02-25 12:23:38,721 - INFO - API docs available at http://localhost:8000/docs
+2026-02-25 12:29:27,093 - INFO - Processing image 8d60438b-d57c-493b-98e9-59a47fb41df0 with style=StyleOption.anime, skip_preprocess=False
+2026-02-25 12:29:27,450 - INFO - Successfully processed 8d60438b-d57c-493b-98e9-59a47fb41df0: 101 paths
