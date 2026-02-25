@@ -158,3 +158,84 @@ The analyser checks four things: luminance (grid-based uneven lighting detection
 - Uses Potrace for raster-to-vector conversion
 - **Otsu's thresholding** for binarization — automatically picks the optimal threshold per image instead of a fixed value, which works really well for anime style in particular (joins broken lines and produces much cleaner paths)
 - Potrace CLI with optimized parameters per style
+
+## API
+
+HTTP wrapper around the pipeline for the Node.js server.
+
+### Start the server
+
+```bash
+cd scripts
+python api.py
+# Runs on http://localhost:8000
+# Interactive docs at http://localhost:8000/docs
+```
+
+Logs are written to `logs/api.log` and the terminal.
+
+### Endpoints
+
+**GET /health**
+Returns `{ status: "healthy" }`. Use to check the server is up.
+
+---
+
+**POST /analyse**
+Analyse image quality without generating an SVG.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `file` | JPEG or PNG | Max 10MB |
+
+Response:
+```json
+{
+  "success": true,
+  "data": {},
+  "analysis": {
+    "metrics": {
+      "brightness": 0.5,
+      "contrast": 0.46,
+      "blur_score": 0.28,
+      "resolution": [640, 427]
+    },
+    "warnings": ["Resolution is low (640x427)"]
+  }
+}
+```
+
+---
+
+**POST /generate-svg**
+Full pipeline — photo in, SVG out.
+
+| Field | Type | Default | Notes |
+|-------|------|---------|-------|
+| `file` | JPEG or PNG | — | Max 10MB |
+| `style` | `contour` \| `anime` | `contour` | Dropdown in /docs |
+| `skip_preprocess` | boolean | `false` | Skip analysis + preprocessing |
+
+Response:
+```json
+{
+  "success": true,
+  "data": {
+    "svg": "<svg>...</svg>",
+    "style": "anime",
+    "preprocessing_applied": ["resize"]
+  },
+  "analysis": {
+    "metrics": {
+      "total_time_ms": 2753,
+      "lineart_time_ms": 1553,
+      "vectorization_time_ms": 1200,
+      "path_count": 82,
+      "file_size_kb": 31.47
+    },
+    "warnings": ["Resolution is low (640x427)"]
+  }
+}
+```
+
+`total_time_ms` covers preprocessing + lineart + vectorization. Warnings reflect the original image before preprocessing was applied.
