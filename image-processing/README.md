@@ -53,13 +53,6 @@ pip install -r requirements.txt
 brew install potrace
 ```
 
-### 3. Download model weights
-
-The pre-trained `.pth` files are in:
-- `models/contour_style/netG_A_latest.pth`
-- `models/anime_style/netG_A_latest.pth`
-- `models/feats2Geom/feats2depth.pth`
-
 ## Usage
 
 Single command to go from a photo to SVG:
@@ -212,7 +205,7 @@ Full pipeline — photo in, SVG out.
 
 | Field | Type | Default | Notes |
 |-------|------|---------|-------|
-| `file` | JPEG or PNG | — | Max 10MB |
+| `file` | JPEG or PNG | — | Max 20MB |
 | `style` | `contour` \| `anime` | `contour` | Dropdown in /docs |
 | `skip_preprocess` | boolean | `false` | Skip analysis + preprocessing |
 
