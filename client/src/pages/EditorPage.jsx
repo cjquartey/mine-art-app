@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { PaperCanvas } from "../components/Editor/PaperCanvas";
 import { TopToolbar } from "../components/Editor/TopToolbar";
 import { LeftSidebar } from "../components/Editor/LeftSidebar";
@@ -7,6 +7,7 @@ import { useDrawing } from '../hooks/useDrawing';
 import { useSelection } from '../components/Editor/hooks/useSelection';
 import { SelectionOverlay } from '../components/Editor/SelectionOverlay';
 import { useTransform } from '../components/Editor/hooks/useTransform';
+import { useHistory } from '../components/Editor/hooks/useHistory';
 
 export function EditorPage() {
     const {drawingId} = useParams();
@@ -18,9 +19,23 @@ export function EditorPage() {
     const [transformationTrigger, setTransformationTrigger] = useState(null);
     const {selectedPathIds, getSelectionBounds, selectPath, clearSelection} = useSelection();
     const paperCanvasRef = useRef(null);
+    const {canRedo, canUndo, pushSnapshot, redo, undo} = useHistory();
 
-    function handleToolSelect(toolType) {
-        setToolMode(toolType);
+    function handleToolSelect(toolName) {
+        setToolMode(toolName);
+    }
+
+    function handleToolClick(toolName) {
+        if (toolName === 'Redo') {
+            const snapshot = redo();
+            if (snapshot) paperCanvasRef.current?.loadSVG(snapshot);
+            clearSelection();
+        }
+        else if (toolName === 'Undo') {
+            const snapshot = undo();
+            if (snapshot) paperCanvasRef.current?.loadSVG(snapshot);
+            clearSelection();
+        }
     }
 
     function handlePathSelect(pathId, nativeEvent) {
@@ -40,7 +55,31 @@ export function EditorPage() {
 
     function onTransformEnd() {
         cancelTransform();
+        const svg = paperCanvasRef.current?.getCurrentSVG();
+        if (svg) pushSnapshot(svg.svgString, svg.panOffset);
+        clearSelection();
     }
+
+    useEffect(() => {
+        function handleKeyDown(e) {
+            if (!e.ctrlKey) return;
+
+            if (e.key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                const snapshot = undo();
+                if (snapshot) paperCanvasRef.current?.loadSVG(snapshot);
+                clearSelection();
+            } else if (e.key === 'y' || (e.key === 'z' && e.shiftKey)) {
+                e.preventDefault();
+                const snapshot = redo();
+                if (snapshot) paperCanvasRef.current?.loadSVG(snapshot);
+                clearSelection();
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [undo, redo]);
 
     return (
         <div className="h-[calc(100vh-64px)] w-full overflow-hidden">
@@ -52,6 +91,9 @@ export function EditorPage() {
                         onZoomChange={setZoom}
                         activeTool={toolMode}
                         onToolSelect={handleToolSelect}
+                        onToolClick={handleToolClick}
+                        canRedo={canRedo}
+                        canUndo={canUndo}
                     />
                     <div className="relative flex-1 overflow-hidden">
                         <PaperCanvas
@@ -62,6 +104,7 @@ export function EditorPage() {
                             selectedPathIds={selectedPathIds} 
                             onPathSelect={handlePathSelect}
                             onPan={setPanTrigger}
+                            onSVGLoaded={pushSnapshot}
                             ref={paperCanvasRef}
                         />
 

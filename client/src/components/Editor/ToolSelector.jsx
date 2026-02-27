@@ -1,32 +1,57 @@
-import { CursorIcon, PanIcon } from "../../icons";
+import { CursorIcon, PanIcon, RedoIcon, UndoIcon } from "../../icons";
 
-export function ToolSelector({activeTool, onToolSelect}) {
+export function ToolSelector({activeTool, onToolSelect, onToolClick, canUndo, canRedo}) {
     const tools = [
-        {type: 'Select', icon: <CursorIcon />},
-        {type: 'Pan', icon: <PanIcon />}
+        {name: 'Select', type: 'active', icon: <CursorIcon />},
+        {name: 'Pan', type: 'active', icon: <PanIcon />},
+        {name: 'Undo', type: 'click', icon: <UndoIcon />},
+        {name: 'Redo', type: 'click', icon: <RedoIcon />}
     ];
 
     return (
         <div className="flex gap-4">
             {tools.map(tool =>
                 <ToolbarButton
-                    key={tool.type}
-                    type={tool.type}
+                    key={tool.name}
+                    name={tool.name}
                     icon={tool.icon}
-                    isActive={tool.type === activeTool}
-                    onToolSelect={onToolSelect}
+                    type={tool.type}
+                    {...(tool.type === 'click' && {
+                        onToolClick : onToolClick,
+                        canRedo : canRedo,
+                        canUndo : canUndo
+                    })}
+                    {...(tool.type === 'active' && {
+                        onToolSelect : onToolSelect, 
+                        isActive : (tool.name === activeTool)
+                    })}
                 />
             )}
         </div>
     )
 }
 
-function ToolbarButton({type, icon, isActive, onToolSelect}){
-    return (
-        <div className="tooltip tooltip-bottom" data-tip={type}>
-            <button className={`btn btn-square ${isActive ? 'btn-active' : ''}`} onClick={() => onToolSelect(type)}>
-                {icon}
-            </button>
-        </div>
-    )
+function ToolbarButton({name, icon, type, onToolClick, canRedo, canUndo, isActive, onToolSelect}){
+    if (type === 'click'){
+        return(
+            <div className="tooltip tooltip-bottom" data-tip={name}>
+                <button 
+                    className={`btn btn-square`}
+                    disabled={(name === 'Undo' && !canUndo) || (name === 'Redo' && !canRedo)}
+                    onClick={() => onToolClick(name)}
+                >
+                    {icon}
+                </button>
+            </div>
+        )
+    }
+    else if (type === 'active') {
+        return (
+            <div className="tooltip tooltip-bottom" data-tip={name}>
+                <button className={`btn btn-square ${isActive ? 'btn-active' : ''}`} onClick={() => onToolSelect(name)}>
+                    {icon}
+                </button>
+            </div>
+        )
+    }
 }

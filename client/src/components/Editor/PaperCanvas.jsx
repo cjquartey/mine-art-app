@@ -9,6 +9,7 @@ export function PaperCanvas({
     selectedPathIds,
     onPathSelect, 
     onPan,
+    onSVGLoaded,
     ref
 }) {
     const containerRef = useRef(null);
@@ -19,7 +20,18 @@ export function PaperCanvas({
 
     useImperativeHandle(ref, () => ({
         getScope: () => scopeRef,
-        getContainer: () => containerRef
+        getContainer: () => containerRef,
+        getCurrentSVG: () => { return {
+            svgString: scopeRef.current.project.exportSVG({asString: true}),
+            panOffset: scopeRef.current.project.bounds
+                ? scopeRef.current.view.center.subtract(scopeRef.current.project.bounds.center)
+                : new paper.Point(0, 0)
+        }},
+        loadSVG: ({svgString, panOffset}) => {
+            scopeRef.current.project.clear();
+            const newImportedBounds = scopeRef.current.project.importSVG(svgString);
+            scopeRef.current.view.center = newImportedBounds.bounds.center.add(panOffset);
+        }
     }));
 
     useEffect(() => {
@@ -91,6 +103,10 @@ export function PaperCanvas({
             scopeRef.current.project.clear();
             const imported = scopeRef.current.project.importSVG(svgContent);
             if (imported) scopeRef.current.view.center = imported.bounds.center;
+            onSVGLoaded(
+                scopeRef.current.project.exportSVG({asString: true}), 
+                scopeRef.current.view.center.subtract(imported.bounds.center)
+            )
         }
     }, [svgContent]);
 

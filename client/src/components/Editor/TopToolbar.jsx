@@ -1,7 +1,7 @@
 import { ZoomSlider } from "./ZoomSlider";
 import { ToolSelector } from "./ToolSelector";
 
-export function TopToolbar({zoom, onZoomChange, activeTool, onToolSelect}) {
+export function TopToolbar({zoom, onZoomChange, activeTool, onToolSelect, onToolClick, canUndo, canRedo}) {
     return (
         <nav className="navbar w-full bg-base-300 shrink-0">
             <label htmlFor="my-drawer-4" aria-label="open sidebar" className="btn btn-square btn-ghost">
@@ -12,6 +12,9 @@ export function TopToolbar({zoom, onZoomChange, activeTool, onToolSelect}) {
                 <ToolSelector 
                     activeTool={activeTool}
                     onToolSelect={onToolSelect}
+                    onToolClick={onToolClick}
+                    canUndo={canUndo}
+                    canRedo={canRedo}
                 />
             <div className="flex-1" />
             <ZoomSlider zoom={zoom} onZoomChange={onZoomChange} />
