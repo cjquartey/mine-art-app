@@ -36,6 +36,23 @@ export function EditorPage() {
             if (snapshot) paperCanvasRef.current?.loadSVG(snapshot);
             clearSelection();
         }
+        else if (toolName === 'Duplicate') {
+            if (selectedPathIds.size > 0) {
+                const duplicatedPathIds = paperCanvasRef.current?.duplicatePaths(selectedPathIds);
+                const svg = paperCanvasRef.current?.getCurrentSVG();
+                if (svg) pushSnapshot(svg.svgString, svg.panOffset);
+                clearSelection();
+                duplicatedPathIds.forEach(pathId => selectPath(pathId));
+            }
+        }
+        else if (toolName === 'Delete') {
+            if (selectedPathIds.size > 0) {
+                paperCanvasRef.current?.deletePaths(selectedPathIds);
+                const svg = paperCanvasRef.current?.getCurrentSVG();
+                if (svg) pushSnapshot(svg.svgString, svg.panOffset);
+                clearSelection();
+            }
+        }
     }
 
     function handlePathSelect(pathId, nativeEvent) {
@@ -62,24 +79,39 @@ export function EditorPage() {
 
     useEffect(() => {
         function handleKeyDown(e) {
-            if (!e.ctrlKey) return;
-
-            if (e.key === 'z' && !e.shiftKey) {
+            if (e.ctrlKey) {
+                if (e.key === 'z' && !e.shiftKey) {
+                    e.preventDefault();
+                    const snapshot = undo();
+                    if (snapshot) paperCanvasRef.current?.loadSVG(snapshot);
+                    clearSelection();
+                } else if (e.key === 'y' || (e.key === 'z' && e.shiftKey)) {
+                    e.preventDefault();
+                    const snapshot = redo();
+                    if (snapshot) paperCanvasRef.current?.loadSVG(snapshot);
+                    clearSelection();
+                } else if (e.key === 'd') {
+                    e.preventDefault();
+                    const duplicatedPathIds = paperCanvasRef.current?.duplicatePaths(selectedPathIds);
+                    const svg = paperCanvasRef.current?.getCurrentSVG();
+                    if (svg) pushSnapshot(svg.svgString, svg.panOffset);
+                    clearSelection();
+                    duplicatedPathIds.forEach(pathId => selectPath(pathId));
+                } 
+            }
+            
+            if (e.key === 'Delete' || e.key === 'Backspace') {
                 e.preventDefault();
-                const snapshot = undo();
-                if (snapshot) paperCanvasRef.current?.loadSVG(snapshot);
-                clearSelection();
-            } else if (e.key === 'y' || (e.key === 'z' && e.shiftKey)) {
-                e.preventDefault();
-                const snapshot = redo();
-                if (snapshot) paperCanvasRef.current?.loadSVG(snapshot);
+                paperCanvasRef.current?.deletePaths(selectedPathIds);
+                const svg = paperCanvasRef.current?.getCurrentSVG();
+                if (svg) pushSnapshot(svg.svgString, svg.panOffset);
                 clearSelection();
             }
         }
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [undo, redo]);
+    }, [undo, redo, selectedPathIds]);
 
     return (
         <div className="h-[calc(100vh-64px)] w-full overflow-hidden">

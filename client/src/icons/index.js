@@ -16,4 +16,6 @@ export {ProfileIcon} from './ProfileIcon';
 export {HelpIcon} from './HelpIcon';
 export {AddUserIcon} from './AddUserIcon';
 export {UndoIcon} from './UndoIcon';
-export {RedoIcon} from './RedoIcon'
+export {RedoIcon} from './RedoIcon';
+export {DeleteIcon} from './DeleteIcon';
+export {DuplicateIcon} from './DuplicateIcon';

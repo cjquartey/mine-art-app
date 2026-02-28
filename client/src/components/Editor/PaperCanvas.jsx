@@ -31,6 +31,26 @@ export function PaperCanvas({
             scopeRef.current.project.clear();
             const newImportedBounds = scopeRef.current.project.importSVG(svgString);
             scopeRef.current.view.center = newImportedBounds.bounds.center.add(panOffset);
+        },
+        deletePaths: (pathIds) => {
+            pathIds.forEach(pathId => {
+                const path = scopeRef.current.project.getItem({name: pathId});
+                if (path) path.remove();
+            })
+        },
+        duplicatePaths: (pathIds) => {
+            const duplicatedPathIds = [];
+            pathIds.forEach(pathId => {
+                const path = scopeRef.current.project.getItem({name: pathId});
+                if (path) {
+                    const duplicatedPath = path.clone();
+                    duplicatedPath.name = `path_${Date.now()}_${Math.round(Math.random() * 1E9)}`;
+                    duplicatedPath.position.x += Math.random() * (75 - 25) + 25;
+                    duplicatedPath.position.y += Math.random() * (30 - 10) + 10;
+                    duplicatedPathIds.push(duplicatedPath.name);
+                }
+            });
+            return duplicatedPathIds;
         }
     }));
 
