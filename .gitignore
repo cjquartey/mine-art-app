@@ -1,11 +1,6 @@
 atlas_credentials.txt
 **/.env*
 node_modules/
-# Image processing models (too large)
-image-processing/models/
-image-processing/*.pth
-*.pth
-
 # Temporary files
 image-processing/temp/
 image-processing/output/
