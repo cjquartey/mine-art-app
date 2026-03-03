@@ -1,7 +1,7 @@
 export function StyleSelector({selectedStyle, onStyleSelect}) {
     const styles = [
-        { value: 'manga', label: 'Manga Style', description: 'Bold, clean lines' },
-        { value: 'sketch', label: 'Sketch Style', description: 'Hand-drawn look' }
+        { value: 'anime', label: 'Anime Style', description: 'Bold, clean lines' },
+        { value: 'contour', label: 'Contour Style', description: 'Hand-drawn look' }
     ];
 
     return(

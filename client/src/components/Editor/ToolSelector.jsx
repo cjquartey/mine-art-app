@@ -1,9 +1,12 @@
-import { CursorIcon, DeleteIcon, DuplicateIcon, PanIcon, RedoIcon, UndoIcon } from "../../icons";
+import { CursorIcon, DeleteIcon, DuplicateIcon, FindIcon, GroupIcon, PanIcon, RedoIcon, SplitIcon, UndoIcon } from "../../icons";
 
 export function ToolSelector({activeTool, onToolSelect, onToolClick, canUndo, canRedo}) {
     const tools = [
         {name: 'Select', type: 'active', icon: <CursorIcon />},
+        {name: 'Select All', type: 'click', icon: <GroupIcon />},
+        {name: 'Find All Paths', type: 'click', icon: <FindIcon />},
         {name: 'Pan', type: 'active', icon: <PanIcon />},
+        {name: 'Split', type: 'active', icon: <SplitIcon />},
         {name: 'Undo', type: 'click', icon: <UndoIcon />},
         {name: 'Redo', type: 'click', icon: <RedoIcon />},
         {name: 'Duplicate', type: 'click', icon: <DuplicateIcon />},

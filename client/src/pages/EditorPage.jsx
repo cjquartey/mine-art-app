@@ -8,6 +8,8 @@ import { useSelection } from '../components/Editor/hooks/useSelection';
 import { SelectionOverlay } from '../components/Editor/SelectionOverlay';
 import { useTransform } from '../components/Editor/hooks/useTransform';
 import { useHistory } from '../components/Editor/hooks/useHistory';
+import { ScissorsPreview } from '../components/Editor/ScissorsPreview';
+import { projectToView } from '../components/Editor/utils/coordinateConversion';
 
 export function EditorPage() {
     const {drawingId} = useParams();
@@ -15,11 +17,14 @@ export function EditorPage() {
     const {startTransform, updateTransform, applyTransform, cancelTransform} = useTransform();
     const [zoom, setZoom] = useState(1);
     const [toolMode, setToolMode] = useState('Select');
+    const [boundsMode, setBoundsMode] = useState('combined');
     const [panTrigger, setPanTrigger] = useState(null);
     const [transformationTrigger, setTransformationTrigger] = useState(null);
-    const {selectedPathIds, getSelectionBounds, selectPath, clearSelection} = useSelection();
+    const {selectedPathIds, getSelectionBounds, selectPath, selectAll, clearSelection} = useSelection();
     const paperCanvasRef = useRef(null);
+    const activeTransformPathIdRef = useRef(null);
     const {canRedo, canUndo, pushSnapshot, redo, undo} = useHistory();
+    const [point, setPoint] = useState(null);
 
     function handleToolSelect(toolName) {
         setToolMode(toolName);
@@ -42,7 +47,7 @@ export function EditorPage() {
                 const svg = paperCanvasRef.current?.getCurrentSVG();
                 if (svg) pushSnapshot(svg.svgString, svg.panOffset);
                 clearSelection();
-                duplicatedPathIds.forEach(pathId => selectPath(pathId));
+                duplicatedPathIds.forEach(pathId => selectPath(pathId, true));
             }
         }
         else if (toolName === 'Delete') {
@@ -53,24 +58,56 @@ export function EditorPage() {
                 clearSelection();
             }
         }
+        else if (toolName === 'Select All') {
+            paperCanvasRef.current?.selectAllPaths();
+        }
+        else if (toolName === 'Find All Paths') {
+            const pathIds = paperCanvasRef.current?.getAllPathIds();
+            setBoundsMode('individual');
+            if (pathIds) selectAll(pathIds);
+        }
     }
 
     function handlePathSelect(pathId, nativeEvent) {
+        setBoundsMode('combined');
         if (pathId === null) clearSelection();
         else selectPath(pathId, nativeEvent.shiftKey) // Shift for mulitple path selection
     }
 
-    function onTransformStart(handleType, corner, position, originalBounds) {
+    function handlePathHover(projectPoint) {
+        if (projectPoint) {
+            const scope = paperCanvasRef.current?.getScope().current;
+            const viewPoint = projectToView(projectPoint, scope);
+            setPoint(viewPoint);
+        } else {
+            setPoint(null);
+        }
+    }
+
+    function handlePathSplit(originalPathID, newPathID) {
+        setBoundsMode('individual');
+        selectPath(originalPathID, true);
+        selectPath(newPathID, true);
+        const svg = paperCanvasRef.current?.getCurrentSVG();
+        if (svg) pushSnapshot(svg.svgString, svg.panOffset);
+    }
+
+    function onTransformStart(handleType, corner, position, originalBounds, pathId = null) {
+        activeTransformPathIdRef.current = pathId;
         startTransform(handleType, {corner, position, originalBounds});
     }
 
     function onTransform(position) {
         updateTransform(paperCanvasRef, position);
-        applyTransform(paperCanvasRef, selectedPathIds);
+        const pathIds = activeTransformPathIdRef.current
+            ? new Set([activeTransformPathIdRef.current])
+            : selectedPathIds;
+        applyTransform(paperCanvasRef, pathIds);
         setTransformationTrigger({active: true});
     }
 
     function onTransformEnd() {
+        activeTransformPathIdRef.current = null;
         cancelTransform();
         const svg = paperCanvasRef.current?.getCurrentSVG();
         if (svg) pushSnapshot(svg.svgString, svg.panOffset);
@@ -96,7 +133,7 @@ export function EditorPage() {
                     const svg = paperCanvasRef.current?.getCurrentSVG();
                     if (svg) pushSnapshot(svg.svgString, svg.panOffset);
                     clearSelection();
-                    duplicatedPathIds.forEach(pathId => selectPath(pathId));
+                    duplicatedPathIds.forEach(pathId => selectPath(pathId, true));
                 } 
             }
             
@@ -135,6 +172,9 @@ export function EditorPage() {
                             toolMode={toolMode}
                             selectedPathIds={selectedPathIds} 
                             onPathSelect={handlePathSelect}
+                            onSelectAll={selectAll}
+                            onPathHover={handlePathHover}
+                            onPathSplit={handlePathSplit}
                             onPan={setPanTrigger}
                             onSVGLoaded={pushSnapshot}
                             ref={paperCanvasRef}
@@ -144,12 +184,17 @@ export function EditorPage() {
                             paperCanvasRef={paperCanvasRef}
                             selectedPathIds={selectedPathIds}
                             getSelectionBounds={getSelectionBounds}
+                            boundsMode={boundsMode}
                             zoom={zoom}
                             onTransformStart={onTransformStart}
                             onTransformEnd={onTransformEnd}
                             onTransform={onTransform}
                             panTrigger={panTrigger}
                             transformationTrigger={transformationTrigger}
+                        />}
+
+                        {point && <ScissorsPreview
+                            point={point}
                         />}
                     </div>
                 </div>

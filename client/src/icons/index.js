@@ -19,3 +19,6 @@ export {UndoIcon} from './UndoIcon';
 export {RedoIcon} from './RedoIcon';
 export {DeleteIcon} from './DeleteIcon';
 export {DuplicateIcon} from './DuplicateIcon';
+export {SplitIcon} from './SplitIcon';
+export {GroupIcon} from './GroupIcon';
+export {FindIcon} from './FindIcon';

@@ -7,7 +7,10 @@ export function PaperCanvas({
     onZoomChange,
     toolMode='Select',
     selectedPathIds,
-    onPathSelect, 
+    onPathSelect,
+    onSelectAll,
+    onPathHover,
+    onPathSplit, 
     onPan,
     onSVGLoaded,
     ref
@@ -17,6 +20,7 @@ export function PaperCanvas({
     const scopeRef = useRef(null);
     const toolModeRef = useRef(toolMode);
     const onPathSelectRef = useRef(onPathSelect);
+    const onPathHoverRef = useRef(onPathHover);
 
     useImperativeHandle(ref, () => ({
         getScope: () => scopeRef,
@@ -51,13 +55,24 @@ export function PaperCanvas({
                 }
             });
             return duplicatedPathIds;
+        },
+        selectAllPaths: () => {
+            const paths = scopeRef.current.project.getItems({class: 'Path'});
+            const pathIds = paths.map(path => path.name);
+            onSelectAll(pathIds);
+        },
+        getAllPathIds: () => {
+            const paths = scopeRef.current.project.getItems({class: 'Path'});
+            const pathIds = paths.map(path => path.name);
+            return pathIds;
         }
     }));
 
     useEffect(() => {
         toolModeRef.current = toolMode;
         onPathSelectRef.current = onPathSelect;
-    }, [toolMode, onPathSelect])
+        onPathHoverRef.current = onPathHover;
+    }, [toolMode, onPathSelect, onPathHover]);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -69,6 +84,8 @@ export function PaperCanvas({
         scope.setup(canvas);
         scopeRef.current = scope;
 
+        let hoveredPath = null;
+
         // Handle click events based on the chosen tool
         scope.view.onMouseDown = (event) => {
             if (toolModeRef.current === 'Select') {
@@ -79,7 +96,8 @@ export function PaperCanvas({
                     tolerance: 5
                 }
 
-                const hitResult = scope.project.hitTest(event.point, hitOptions);
+                const hitResults = scope.project.hitTestAll(event.point, hitOptions);
+                const hitResult = hitResults.find(r => r.item instanceof paper.Path);
                 
                 if (hitResult) {
                     const targetPath = hitResult.item;
@@ -90,12 +108,88 @@ export function PaperCanvas({
                     onPathSelectRef.current?.(null, event.event);
                 }
             }
+            else if (toolModeRef.current === 'Split'){
+                const hitOptions = {
+                    segments: true,
+                    stroke: true,
+                    tolerance: 5,
+                    match: function(hitResult) {
+                        return (hitResult.type === "stroke" || hitResult.type === "segment")
+                    }
+                }
+
+                const hitResults = scope.project.hitTestAll(event.point, hitOptions);
+                hitResults.forEach(hitResult => {
+                    const originalPath = hitResult.item;
+                    const splitPoint = originalPath.getNearestPoint(hitResult.point);
+                    const scalarOffset = originalPath.getOffsetOf(splitPoint);
+                    const newPath = originalPath.splitAt(scalarOffset);
+                    if (newPath) {
+                        newPath.position.x += Math.random() * (20 - 10) + 10;
+                        newPath.position.y += Math.random() * (20 - 10) + 10;
+                        newPath.name = `path_${Date.now()}_${Math.round(Math.random() * 1E9)}`;
+                        onPathSplit(originalPath.name, newPath.name);
+                    }
+                })
+            }
         }
         // Pan canvas on mouse drag
         scope.view.onMouseDrag = (event) => {
             if (toolModeRef.current === 'Pan') {
                 scope.view.center = scope.view.center.subtract(event.delta);
                 onPan?.(scope.view.center);
+            }
+        }
+
+        scope.view.onMouseMove = (event) => {
+            if (toolModeRef.current === 'Split') {
+                const hitOptions = {
+                    segments: true,
+                    stroke: true,
+                    tolerance: 5,
+                    match: function(hitResult) {
+                        return (hitResult.type === "stroke" || hitResult.type === "segment")
+                    }
+                }
+
+                const hitResults = scope.project.hitTestAll(event.point, hitOptions);
+                console.log(hitResults);
+                const hitResult = hitResults[0];
+
+                if (hitResult) {
+                    onPathHoverRef.current?.(hitResult.point);
+                } else {
+                    onPathHoverRef.current?.(null);
+                }
+            }
+
+            else if (toolModeRef.current === 'Select') {
+                const hitOptions = {
+                    segments: true,
+                    stroke: true,
+                    fill: true,
+                    tolerance: 5
+                }
+
+                const hitResults = scope.project.hitTestAll(event.point, hitOptions);
+                const hitResult = hitResults.find(r => r.item instanceof paper.Path);
+                console.log(hitResults);
+                
+                const newPath = hitResult?.item ?? null;
+
+                if (newPath !== hoveredPath) {
+                    if (hoveredPath) {
+                        hoveredPath.strokeColor = hoveredPath.data.hoverOriginalStrokeColor;
+                        hoveredPath.strokeWidth = hoveredPath.data.hoverOriginalStrokeWidth;
+                    }
+                    hoveredPath = newPath;
+                    if (newPath) {
+                        newPath.data.hoverOriginalStrokeColor = newPath.strokeColor?.clone() ?? null;
+                        newPath.data.hoverOriginalStrokeWidth = newPath.strokeWidth;
+                        newPath.strokeColor = new paper.Color(0.2, 0.6, 1);
+                        newPath.strokeWidth = Math.max(newPath.strokeWidth, 1) + 2;
+                    }
+                }
             }
         }
 
@@ -120,6 +214,7 @@ export function PaperCanvas({
     // Load drawing
     useEffect(() => {
         if (svgContent && scopeRef.current) {
+            console.log(svgContent);
             scopeRef.current.project.clear();
             const imported = scopeRef.current.project.importSVG(svgContent);
             if (imported) scopeRef.current.view.center = imported.bounds.center;

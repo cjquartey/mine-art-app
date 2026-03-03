@@ -15,7 +15,11 @@ export function useSelection() {
             }
             else return new Set([pathId]);
         })
-    }, [])    
+    }, []);
+    
+    const selectAll = useCallback((pathIds) => {
+        setSelectedPathIds(new Set(pathIds));
+    }, []);
 
     const deselectPath = useCallback((pathId) => {
         setSelectedPathIds(prevPathIds => {
@@ -36,19 +40,25 @@ export function useSelection() {
 
     const getSelectionBounds = useCallback((scopeRef) => {
         // Aggregate bounds of all selected paths
-        let selectionBounds = null;
+        let combinedBounds = null;
+        let individualBounds = [];
         selectedPathIds.forEach(pathId => {
             const path = scopeRef.current.project.getItem({name: pathId});
             if (path) {
-                selectionBounds = selectionBounds ? selectionBounds.unite(path.bounds) : path.bounds.clone();
+                combinedBounds = combinedBounds ? combinedBounds.unite(path.bounds) : path.bounds.clone();
+                individualBounds.push({
+                    bounds: path.bounds,
+                    pathId: path.name
+                });
             }
         });
-        return selectionBounds;
+        return {combinedBounds, individualBounds};
     }, [selectedPathIds]) ;
 
     return {
         selectedPathIds,
         selectPath,
+        selectAll,
         deselectPath,
         clearSelection,
         isSelected,
