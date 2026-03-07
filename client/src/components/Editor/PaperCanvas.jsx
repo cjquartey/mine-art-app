@@ -26,15 +26,16 @@ export function PaperCanvas({
         getScope: () => scopeRef,
         getContainer: () => containerRef,
         getCurrentSVG: () => { return {
-            svgString: scopeRef.current.project.exportSVG({asString: true}),
+            svgString: scopeRef.current.project.exportSVG({asString: true, bounds: 'content'}),
             panOffset: scopeRef.current.project.bounds
                 ? scopeRef.current.view.center.subtract(scopeRef.current.project.bounds.center)
                 : new paper.Point(0, 0)
         }},
         loadSVG: ({svgString, panOffset}) => {
             scopeRef.current.project.clear();
-            const newImportedBounds = scopeRef.current.project.importSVG(svgString);
-            scopeRef.current.view.center = newImportedBounds.bounds.center.add(panOffset);
+            const imported = scopeRef.current.project.importSVG(svgString);
+            imported.children[0].remove();
+            scopeRef.current.view.center = imported.bounds.center.add(panOffset);
         },
         deletePaths: (pathIds) => {
             pathIds.forEach(pathId => {
@@ -57,22 +58,29 @@ export function PaperCanvas({
             return duplicatedPathIds;
         },
         selectAllPaths: () => {
-            const paths = scopeRef.current.project.getItems({class: 'Path'});
+            const paths = scopeRef.current.project.getItems({
+                match: (item) => item instanceof paper.Path || item instanceof paper.CompoundPath
+            });
             const pathIds = paths.map(path => path.name);
             onSelectAll(pathIds);
         },
         getAllPathIds: () => {
-            const paths = scopeRef.current.project.getItems({class: 'Path'});
+            const paths = scopeRef.current.project.getItems({
+                match: (item) => item instanceof paper.Path || item instanceof paper.CompoundPath
+            });
             const pathIds = paths.map(path => path.name);
             return pathIds;
         }
     }));
 
+    const selectedPathIdsRef = useRef(selectedPathIds);
+
     useEffect(() => {
         toolModeRef.current = toolMode;
         onPathSelectRef.current = onPathSelect;
         onPathHoverRef.current = onPathHover;
-    }, [toolMode, onPathSelect, onPathHover]);
+        selectedPathIdsRef.current = selectedPathIds;
+    }, [toolMode, onPathSelect, onPathHover, selectedPathIds]);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -85,22 +93,27 @@ export function PaperCanvas({
         scopeRef.current = scope;
 
         let hoveredPath = null;
+        let hoverTimeout = null;
 
         // Handle click events based on the chosen tool
         scope.view.onMouseDown = (event) => {
             if (toolModeRef.current === 'Select') {
                 const hitOptions = {
-                    segments: true,
                     stroke: true,
                     fill: true,
                     tolerance: 5
                 }
 
                 const hitResults = scope.project.hitTestAll(event.point, hitOptions);
-                const hitResult = hitResults.find(r => r.item instanceof paper.Path);
+                const hitResult = hitResults.find(r => 
+                    r.item instanceof paper.Path || r.item instanceof paper.CompoundPath
+                );
                 
                 if (hitResult) {
                     const targetPath = hitResult.item;
+                    console.log('path matrix:', targetPath.matrix.toString());
+                    console.log('parent matrix:', targetPath.parent.matrix.toString());
+                    console.log('grandparent matrix:', targetPath.parent?.parent?.matrix.toString());
                     const pathId = targetPath.name;
                     onPathSelectRef.current?.(pathId, event.event);
                 } else {
@@ -112,25 +125,23 @@ export function PaperCanvas({
                 const hitOptions = {
                     segments: true,
                     stroke: true,
-                    tolerance: 5,
-                    match: function(hitResult) {
-                        return (hitResult.type === "stroke" || hitResult.type === "segment")
-                    }
+                    tolerance: 5
                 }
 
                 const hitResults = scope.project.hitTestAll(event.point, hitOptions);
-                hitResults.forEach(hitResult => {
-                    const originalPath = hitResult.item;
-                    const splitPoint = originalPath.getNearestPoint(hitResult.point);
-                    const scalarOffset = originalPath.getOffsetOf(splitPoint);
-                    const newPath = originalPath.splitAt(scalarOffset);
-                    if (newPath) {
-                        newPath.position.x += Math.random() * (20 - 10) + 10;
-                        newPath.position.y += Math.random() * (20 - 10) + 10;
-                        newPath.name = `path_${Date.now()}_${Math.round(Math.random() * 1E9)}`;
-                        onPathSplit(originalPath.name, newPath.name);
-                    }
-                })
+                const hitResult = hitResults.find(r => 
+                    r.item instanceof paper.Path || r.item instanceof paper.CompoundPath
+                );
+                const originalPath = hitResult.item;
+                const splitPoint = originalPath.getNearestPoint(hitResult.point);
+                const scalarOffset = originalPath.getOffsetOf(splitPoint);
+                const newPath = originalPath.splitAt(scalarOffset);
+                if (newPath) {
+                    newPath.position.x += Math.random() * (20 - 10) + 10;
+                    newPath.position.y += Math.random() * (20 - 10) + 10;
+                    newPath.name = `path_${Date.now()}_${Math.round(Math.random() * 1E9)}`;
+                    onPathSplit(originalPath.name, newPath.name);
+                }
             }
         }
         // Pan canvas on mouse drag
@@ -146,15 +157,13 @@ export function PaperCanvas({
                 const hitOptions = {
                     segments: true,
                     stroke: true,
-                    tolerance: 5,
-                    match: function(hitResult) {
-                        return (hitResult.type === "stroke" || hitResult.type === "segment")
-                    }
+                    tolerance: 5
                 }
 
                 const hitResults = scope.project.hitTestAll(event.point, hitOptions);
-                console.log(hitResults);
-                const hitResult = hitResults[0];
+                const hitResult = hitResults.find(r => 
+                    r.item instanceof paper.Path || r.item instanceof paper.CompoundPath
+                )
 
                 if (hitResult) {
                     onPathHoverRef.current?.(hitResult.point);
@@ -164,32 +173,43 @@ export function PaperCanvas({
             }
 
             else if (toolModeRef.current === 'Select') {
-                const hitOptions = {
-                    segments: true,
-                    stroke: true,
-                    fill: true,
-                    tolerance: 5
-                }
+                if (hoverTimeout) clearTimeout(hoverTimeout);
 
-                const hitResults = scope.project.hitTestAll(event.point, hitOptions);
-                const hitResult = hitResults.find(r => r.item instanceof paper.Path);
-                console.log(hitResults);
-                
-                const newPath = hitResult?.item ?? null;
+                hoverTimeout = setTimeout(() => {                    
+                    const hitOptions = {
+                        stroke: true,
+                        fill: true,
+                        tolerance: 5
+                    }
 
-                if (newPath !== hoveredPath) {
-                    if (hoveredPath) {
-                        hoveredPath.strokeColor = hoveredPath.data.hoverOriginalStrokeColor;
-                        hoveredPath.strokeWidth = hoveredPath.data.hoverOriginalStrokeWidth;
+                    const hitResults = scope.project.hitTestAll(event.point, hitOptions);
+                    const hitResult = hitResults.find(r => 
+                        r.item instanceof paper.Path || r.item instanceof paper.CompoundPath
+                    );
+                    
+                    const newPath = hitResult?.item ?? null;
+                    canvasRef.current.style.cursor = newPath ? 'pointer' : 'default';
+
+                    if (newPath !== hoveredPath) {
+                        if (hoveredPath) {
+                            if (selectedPathIdsRef.current.has(hoveredPath.name)) {
+                                // Re-apply selection style so it isn't lost when un-hovering
+                                hoveredPath.strokeColor = new paper.Color(0.2, 0.6, 1);
+                            } else {
+                                hoveredPath.strokeColor = hoveredPath.data.originalStroke?.clone() ?? null;
+                            }
+                        }
+                        hoveredPath = newPath;
+                        if (newPath) {
+                            // Initialise true originals in case SVG loaded before this code ran
+                            if (!newPath.data.originalStyleSaved) {
+                                newPath.data.originalStroke = newPath.strokeColor?.clone() ?? null;
+                                newPath.data.originalStyleSaved = true;
+                            }
+                            newPath.strokeColor = new paper.Color(0.2, 0.6, 1);
+                        }
                     }
-                    hoveredPath = newPath;
-                    if (newPath) {
-                        newPath.data.hoverOriginalStrokeColor = newPath.strokeColor?.clone() ?? null;
-                        newPath.data.hoverOriginalStrokeWidth = newPath.strokeWidth;
-                        newPath.strokeColor = new paper.Color(0.2, 0.6, 1);
-                        newPath.strokeWidth = Math.max(newPath.strokeWidth, 1) + 2;
-                    }
-                }
+                }, 16);
             }
         }
 
@@ -217,9 +237,30 @@ export function PaperCanvas({
             console.log(svgContent);
             scopeRef.current.project.clear();
             const imported = scopeRef.current.project.importSVG(svgContent);
-            if (imported) scopeRef.current.view.center = imported.bounds.center;
+            if (imported) {
+                scopeRef.current.view.center = imported.bounds.center;
+                imported.fitBounds(scopeRef.current.view.bounds.scale(0.7));
+                function applyMatrixDeep(item) {
+                    if (item.children) item.children.forEach(applyMatrixDeep);
+                    item.applyMatrix = true;
+                }
+                applyMatrixDeep(imported);
+            }
+            const backgroundShape = imported.children[0];
+            const drawingGroup = imported.children[1];
+
+            drawingGroup.children?.forEach(item => {
+                // Name and save true originals before any hover/selection styling can corrupt them
+                if (!item.name) item.name = `path_${Date.now()}_${Math.round(Math.random() * 1E9)}`;
+                item.data.originalStroke = item.strokeColor?.clone() ?? null;
+                item.data.originalStrokeWidth = item.strokeWidth ?? 0;
+                item.data.originalStyleSaved = true;
+            });
+
+            backgroundShape.remove();
+
             onSVGLoaded(
-                scopeRef.current.project.exportSVG({asString: true}), 
+                scopeRef.current.project.exportSVG({asString: true, bounds: 'content'}), 
                 scopeRef.current.view.center.subtract(imported.bounds.center)
             )
         }
@@ -229,24 +270,27 @@ export function PaperCanvas({
     useEffect(() => {
         if (!scopeRef.current) return;
 
-        const paths = scopeRef.current.project.getItems({class: 'Path'});
+        const paths = scopeRef.current.project.getItems({
+            match: (item) => item instanceof paper.Path || item instanceof paper.CompoundPath
+        });
         paths.forEach(path => {
             const pathId = path.name;
             if (selectedPathIds.has(pathId)) {
-                // Store original path styles
-                if (!path.data.originalStroke) {
-                    path.data.originalStroke = path.strokeColor?.clone();
-                    path.data.originalStrokeWidth = path.strokeWidth;
+                // Lazily save true originals (guarded by flag, not falsy originalStroke)
+                if (!path.data.originalStyleSaved) {
+                    path.data.originalStroke = path.strokeColor?.clone() ?? null;
+                    path.data.originalStrokeWidth = path.strokeWidth ?? 0;
+                    path.data.originalStyleSaved = true;
                 }
                 // Apply selection style
+                path.strokeColor = new paper.Color(0.2, 0.6, 1);
                 path.strokeWidth = path.data.originalStrokeWidth + 2;
-                path.selected = true;
             } else {
-                // Restore original styles
-                if (path.data.originalStroke) {
+                // Restore true original styles
+                if (path.data.originalStyleSaved) {
                     path.strokeWidth = path.data.originalStrokeWidth;
+                    path.strokeColor = path.data.originalStroke?.clone() ?? null;
                 }
-                path.selected = false;
             }
         })
     }, [selectedPathIds]);
