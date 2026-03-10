@@ -22,3 +22,4 @@ export {DuplicateIcon} from './DuplicateIcon';
 export {SplitIcon} from './SplitIcon';
 export {GroupIcon} from './GroupIcon';
 export {FindIcon} from './FindIcon';
+export {DrawIcon} from './DrawIcon';

@@ -24,6 +24,8 @@ export function EditorPage() {
     const paperCanvasRef = useRef(null);
     const activeTransformPathIdRef = useRef(null);
     const {canRedo, canUndo, pushSnapshot, redo, undo} = useHistory();
+    const [strokeWidth, setStrokeWidth] = useState(4);
+    const [strokeColour, setStrokeColour] = useState('#000000');
     const [point, setPoint] = useState(null);
 
     function handleToolSelect(toolName) {
@@ -88,6 +90,11 @@ export function EditorPage() {
         setBoundsMode('individual');
         selectPath(originalPathID, true);
         selectPath(newPathID, true);
+        const svg = paperCanvasRef.current?.getCurrentSVG();
+        if (svg) pushSnapshot(svg.svgString, svg.panOffset);
+    }
+
+    function handleDrawEnd() {
         const svg = paperCanvasRef.current?.getCurrentSVG();
         if (svg) pushSnapshot(svg.svgString, svg.panOffset);
     }
@@ -163,6 +170,10 @@ export function EditorPage() {
                         onToolClick={handleToolClick}
                         canRedo={canRedo}
                         canUndo={canUndo}
+                        drawWidth={strokeWidth}
+                        onDrawWidthChange={setStrokeWidth}
+                        strokeColour={strokeColour}
+                        onColourChange={color => setStrokeColour(color.hex)}
                     />
                     <div className="relative flex-1 overflow-hidden">
                         <PaperCanvas
@@ -170,7 +181,10 @@ export function EditorPage() {
                             zoom={zoom}
                             onZoomChange={setZoom}
                             toolMode={toolMode}
-                            selectedPathIds={selectedPathIds} 
+                            selectedPathIds={selectedPathIds}
+                            drawWidth={strokeWidth}
+                            drawColour={strokeColour}
+                            onDrawEnd={handleDrawEnd}
                             onPathSelect={handlePathSelect}
                             onSelectAll={selectAll}
                             onPathHover={handlePathHover}
