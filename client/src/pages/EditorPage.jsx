@@ -5,11 +5,15 @@ import { LeftSidebar } from "../components/Editor/LeftSidebar";
 import { useParams } from 'react-router-dom';
 import { useDrawing } from '../hooks/useDrawing';
 import { useSelection } from '../components/Editor/hooks/useSelection';
+import { useCollaborativeEditor } from '../components/Editor/hooks/useCollaborativeEditor';
+import { useAuthContext } from '../hooks/useAuthContext';
 import { SelectionOverlay } from '../components/Editor/SelectionOverlay';
 import { useTransform } from '../components/Editor/hooks/useTransform';
 import { useHistory } from '../components/Editor/hooks/useHistory';
 import { ScissorsPreview } from '../components/Editor/ScissorsPreview';
 import { projectToView } from '../components/Editor/utils/coordinateConversion';
+import { LockedPathsOverlay } from '../components/Editor/LockedPathsOverlay';
+import { ErrorMessage } from '../components/ErrorMessage';
 
 export function EditorPage() {
     const {drawingId} = useParams();
@@ -20,13 +24,29 @@ export function EditorPage() {
     const [boundsMode, setBoundsMode] = useState('combined');
     const [panTrigger, setPanTrigger] = useState(null);
     const [transformationTrigger, setTransformationTrigger] = useState(null);
-    const {selectedPathIds, getSelectionBounds, selectPath, selectAll, clearSelection} = useSelection();
     const paperCanvasRef = useRef(null);
     const activeTransformPathIdRef = useRef(null);
-    const {canRedo, canUndo, pushSnapshot, redo, undo} = useHistory();
     const [strokeWidth, setStrokeWidth] = useState(4);
     const [strokeColour, setStrokeColour] = useState('#000000');
     const [point, setPoint] = useState(null);
+    const {user} = useAuthContext();
+    const {canRedo, canUndo, pushSnapshot, redo, undo} = useHistory();
+    const {
+        selectedPathIds, 
+        getSelectionBounds, 
+        selectPath, 
+        selectAll, 
+        clearSelection
+    } = useSelection();
+    const {
+        members,
+        locks,
+        error,
+        collabTrigger,
+        requestLock,
+        releaseLock,
+        emitPathUpdate
+    } = useCollaborativeEditor(drawingId, paperCanvasRef);
 
     function handleToolSelect(toolName) {
         setToolMode(toolName);
@@ -72,8 +92,18 @@ export function EditorPage() {
 
     function handlePathSelect(pathId, nativeEvent) {
         setBoundsMode('combined');
-        if (pathId === null) clearSelection();
-        else selectPath(pathId, nativeEvent.shiftKey) // Shift for mulitple path selection
+        if (pathId === null) {
+            selectedPathIds.forEach(pathId => releaseLock(pathId))
+            clearSelection();
+        }
+        else{
+            if (nativeEvent.shiftKey && selectedPathIds.has(pathId)) {
+                releaseLock(pathId); // Deselect an existing path
+            } else {
+                requestLock(pathId) // Select a new path
+            }
+            selectPath(pathId, nativeEvent.shiftKey) // Shift for mulitple path selection
+        }
     }
 
     function handlePathHover(projectPoint) {
@@ -109,13 +139,15 @@ export function EditorPage() {
         const pathIds = activeTransformPathIdRef.current
             ? new Set([activeTransformPathIdRef.current])
             : selectedPathIds;
-        applyTransform(paperCanvasRef, pathIds);
+        const transformData = applyTransform(paperCanvasRef, pathIds);
+        pathIds.forEach(pathId => emitPathUpdate(pathId, transformData));
         setTransformationTrigger({active: true});
     }
 
     function onTransformEnd() {
         activeTransformPathIdRef.current = null;
         cancelTransform();
+        selectedPathIds.forEach(pathId => releaseLock(pathId));
         const svg = paperCanvasRef.current?.getCurrentSVG();
         if (svg) pushSnapshot(svg.svgString, svg.panOffset);
         clearSelection();
@@ -176,6 +208,7 @@ export function EditorPage() {
                         onColourChange={color => setStrokeColour(color.hex)}
                     />
                     <div className="relative flex-1 overflow-hidden">
+                        {error && <ErrorMessage message={error}/>}
                         <PaperCanvas
                             svgContent={svgContent}
                             zoom={zoom}
@@ -210,9 +243,25 @@ export function EditorPage() {
                         {point && <ScissorsPreview
                             point={point}
                         />}
+
+                        {locks.length > 0 && locks.map(lock => {
+                            if (lock.userId === user.userId) return null;
+                            return (
+                                <LockedPathsOverlay
+                                    key={lock.pathId}
+                                    lock={lock}
+                                    collabTrigger={collabTrigger}
+                                    paperCanvasRef={paperCanvasRef}
+                                    zoom={zoom}
+                                    panTrigger={panTrigger}
+                                />
+                            )
+                        })}
                     </div>
                 </div>
-                <LeftSidebar />
+                <LeftSidebar
+                    collaborators={members}
+                />
             </div>
         </div>
     )

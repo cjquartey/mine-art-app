@@ -1,4 +1,4 @@
-export function LeftSidebar() {
+export function LeftSidebar({collaborators}) {
     return (
         <div className="drawer-side is-drawer-close:overflow-visible">
             <label htmlFor="my-drawer-4" aria-label="close sidebar" className="drawer-overlay"></label>
@@ -22,6 +22,23 @@ export function LeftSidebar() {
                     <span className="is-drawer-close:hidden">Settings</span>
                 </button>
                 </li>
+                {/* Collaborators icons */}
+                {collaborators?.length > 0 && (
+                    <li>
+                        <div className="flex flex-col items-center gap-2 w-full px-1">
+                            {collaborators.map(member => (
+                                <div
+                                    key={member.socketId}
+                                    className="tooltip tooltip-right w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold shrink-0"
+                                    style={{backgroundColor: member.colour}}
+                                    data-tip={member.username}
+                                >
+                                    {member.username[0].toUpperCase()}
+                                </div>
+                            ))}
+                        </div>
+                    </li>
+                )}
             </ul>
             </div>
         </div>

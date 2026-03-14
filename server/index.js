@@ -1,9 +1,18 @@
 require('dotenv').config();
 const PORT = process.env.PORT || 5000;
 const cors = require('cors');
+const {createServer} = require('http');
+const {Server} = require('socket.io');
 const express = require('express');
 const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: '*'
+    }
+});
 const connectDB = require('./config/database');
+const socketAuth = require('./socket/socketAuth');
 const projectRoutes = require('./routes/projectRoutes');
 const authRoutes = require('./routes/authRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
@@ -11,11 +20,13 @@ const drawingRoutes = require('./routes/drawingRoutes');
 const userRoutes = require('./routes/userRoutes');
 const collaborationRoutes = require('./routes/collaborationRoutes');
 const {fork} = require('child_process');
+const initialiseSocket = require('./socket/socketManager');
 
 let workerProcess = null;
 // Middleware
 app.use(cors());
 app.use(express.json());
+io.use(socketAuth)
 
 // Routes
 app.use('/api/projects', projectRoutes);
@@ -57,7 +68,8 @@ function startWorker() {
 const startServer = async () => {
     try{
         await connectDB();
-        app.listen(PORT, () => {
+        initialiseSocket(io);
+        server.listen(PORT, () => {
             console.log(`Server running on Port ${PORT}...`);
         });
         startWorker();

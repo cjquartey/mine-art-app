@@ -110,6 +110,22 @@ export function PaperCanvas({
             });
             const pathIds = paths.map(path => path.name);
             return pathIds;
+        },
+        updatePath: (pathId, transformData) => {
+            if (transformData.type === 'move') {
+                const path = scopeRef.current.project.getItem({name: pathId});
+                if (path) path.translate(transformData.delta);
+            } 
+                    
+            else if (transformData.type === 'rotate') {
+                const path = scopeRef.current.project.getItem({name: pathId});
+                if (path) path.rotate(transformData.rotationDelta, transformData.centerCanvas);
+            }
+
+            else if (transformData.type === 'scale') {
+                const path = scopeRef.current.project.getItem({name: pathId});
+                if (path) path.scale(transformData.incrementalScale, transformData.pivotCanvas)
+            }
         }
     }));
 
@@ -195,10 +211,6 @@ export function PaperCanvas({
                     }  
                 }
                 else {
-                    console.log('item', item);
-                    console.log('item name', item.name);
-                    console.log('first click ref', firstClickRef.current);
-                    console.log('first click ref item name', firstClickRef.current.itemName);
                     if (item.name && item.name !== firstClickRef.current.itemName) {
                         console.log('Names do not match!');
                         firstClickRef.current.splitMarker.remove();
@@ -302,7 +314,6 @@ export function PaperCanvas({
                 } */
             }
             else if (toolModeRef.current === 'Draw'){
-                console.log(drawColourRef.current);
                 drawingPath = new paper.Path({
                     name: `path_${Date.now()}_${Math.round(Math.random() * 1E9)}`,
                     strokeCap: 'round',

@@ -40,7 +40,7 @@ async function register(req, res) {
         });
 
         // Create access token for immediate login after registration
-        const accessToken = generateToken(newUser._id);
+        const accessToken = generateToken(newUser._id, newUser.username);
 
         // Send successful response with user data and access token
         return res.status(201).json({
@@ -84,7 +84,7 @@ async function login(req, res) {
         }
 
         // Generate access token after validating credentials
-        const accessToken = generateToken(foundUser._id);
+        const accessToken = generateToken(foundUser._id, foundUser.username);
 
         // Send successful response with user data and access token
         return res.status(200).json({
@@ -102,9 +102,12 @@ async function login(req, res) {
 };
 
 // Helper function to generate an access token
-function generateToken(userId){
+function generateToken(userId, username){
     return jwt.sign(
-        {'userId': userId}, 
+        {
+            'userId': userId,
+            'username': username
+        }, 
         process.env.JWT_SECRET, 
         {expiresIn: process.env.JWT_EXPIRE}
     );

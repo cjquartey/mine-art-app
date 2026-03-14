@@ -90,6 +90,8 @@ export function useTransform() {
                 if (path) path.scale(transformData.incrementalScale, transformData.pivotCanvas)
             });
         }
+
+        return transformData;
     }
 
     function cancelTransform() {

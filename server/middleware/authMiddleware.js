@@ -19,7 +19,8 @@ async function verifyToken(req, res, next){
 
         // Attach the decoded payload to the request
         req.user = {
-            userId: decoded.userId
+            userId: decoded.userId,
+            username: decoded.username
         }
 
         next();
